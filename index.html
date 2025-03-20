@@ -31,9 +31,9 @@
             margin-bottom: 10px;
         }
 
-        @media (min-width: 768px) {
+        @media (max-width: 768px) {
             h1 {
-                font-size: 2.5rem;
+                font-size: 1.5rem;
             }
         }
 
@@ -52,6 +52,7 @@
             border: 5px solid #ff6b6b;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+            display: block;
         }
 
         #score {
@@ -62,6 +63,12 @@
             font-weight: bold;
             color: #ffff00;
             text-shadow: 2px 2px 4px #000;
+        }
+
+        @media (max-width: 768px) {
+            #score {
+                font-size: 18px;
+            }
         }
 
         #volume-meter {
@@ -100,6 +107,12 @@
             padding: 20px;
         }
 
+        @media (max-width: 768px) {
+            #meme-overlay {
+                font-size: 24px;
+            }
+        }
+
         #game-over {
             position: absolute;
             top: 0;
@@ -117,6 +130,12 @@
             text-align: center;
             padding: 20px;
             z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            #game-over {
+                font-size: 18px;
+            }
         }
 
         button {
@@ -138,6 +157,13 @@
             transform: scale(1.1);
         }
 
+        @media (max-width: 768px) {
+            button {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+        }
+
         #instructions {
             margin-top: 10px;
             font-size: 18px;
@@ -145,6 +171,12 @@
             padding: 10px;
             border-radius: 10px;
             text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            #instructions {
+                font-size: 14px;
+            }
         }
 
         #achievements {
@@ -166,6 +198,12 @@
             font-size: 14px;
         }
 
+        @media (max-width: 768px) {
+            .achievement {
+                font-size: 12px;
+            }
+        }
+
         .achievement.unlocked {
             background-color: #ffff00;
             color: #000;
@@ -179,6 +217,13 @@
             background-color: #ffffff;
             border-radius: 50%;
             opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .feather {
+                width: 15px;
+                height: 15px;
+            }
         }
     </style>
 </head>
@@ -222,6 +267,7 @@
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('game-container');
         const scoreElement = document.getElementById('score');
         const volumeBar = document.getElementById('volume-bar');
         const startButton = document.getElementById('start-button');
@@ -232,8 +278,14 @@
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
 
-        canvas.width = 800;
-        canvas.height = 400;
+        // Dynamically set canvas size
+        function resizeCanvas() {
+            const containerWidth = gameContainer.clientWidth;
+            canvas.width = Math.min(containerWidth, 800);
+            canvas.height = Math.min(containerWidth * 0.5, 400);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
         const bgImage = new Image();
         bgImage.src = 'img/bg.jpg';
@@ -248,13 +300,14 @@
             return img;
         });
 
-        let chicken = { x: 50, y: canvas.height - 80, width: 80, height: 80, vy: 0 }; // Increased chicken size
-        let obstacle = { x: canvas.width, y: 0, width: 0, height: 0 }; // Size set in changeObstacleImage
+        let scaleFactor = canvas.width / 800;
+        let chicken = { x: 50 * scaleFactor, y: 0, width: 80 * scaleFactor, height: 80 * scaleFactor, vy: 0 };
+        let obstacle = { x: canvas.width, y: 0, width: 0, height: 0 };
         let bgX = 0;
         let isJumping = false;
         let score = 0;
         let gameActive = false;
-        let obstacleSpeed = 2;
+        let obstacleSpeed = 4 * scaleFactor; // Increased from 2 to 4
         let consecutiveJumps = 0;
         let stream = null;
         let audioContext = null;
@@ -312,13 +365,19 @@
 
         function resetGame() {
             if (animationFrame) cancelAnimationFrame(animationFrame);
+            scaleFactor = canvas.width / 800;
             score = 0;
             updateScore();
             gameActive = true;
-            obstacleSpeed = 2;
+            obstacleSpeed = 4 * scaleFactor; // Increased from 2 to 4
             isJumping = false;
-            chicken.y = canvas.height - chicken.height;
-            chicken.vy = 0;
+            chicken = { 
+                x: 50 * scaleFactor, 
+                y: canvas.height - 80 * scaleFactor, 
+                width: 80 * scaleFactor, 
+                height: 80 * scaleFactor, 
+                vy: 0 
+            };
             obstacle.x = canvas.width;
             bgX = 0;
             startButton.style.display = 'none';
@@ -399,21 +458,19 @@
         function changeObstacleImage() {
             currentObstacleIndex = Math.floor(Math.random() * obstacleImages.length);
             if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
-                // obs1 and obs2: smaller size
-                obstacle.width = 80;  // Increased from 60
-                obstacle.height = 80; // Increased from 60
+                obstacle.width = 80 * scaleFactor;
+                obstacle.height = 80 * scaleFactor;
             } else {
-                // obs3, obs4, obs5: larger size
-                obstacle.width = 120;  // Larger than obs1 and obs2
-                obstacle.height = 120; // Larger than obs1 and obs2
+                obstacle.width = 120 * scaleFactor;
+                obstacle.height = 120 * scaleFactor;
             }
-            obstacle.y = canvas.height - obstacle.height; // Align to bottom
+            obstacle.y = canvas.height - obstacle.height;
         }
 
         function jumpChicken(volume) {
             if (!isJumping) {
                 isJumping = true;
-                chicken.vy = -Math.min(volume * 2, 20);
+                chicken.vy = -Math.min(volume * 2, 20) * scaleFactor;
                 if (!achievements["achievement-1"]) unlockAchievement("achievement-1");
                 if (volume > 80 && !achievements["achievement-5"]) {
                     unlockAchievement("achievement-5");
@@ -424,7 +481,7 @@
                     showMemeOverlay(randomMeme, 800);
                     createFeatherEffect();
                 }
-                setTimeout(() => chicken.vy = 10, 500);
+                setTimeout(() => chicken.vy = 10 * scaleFactor, 500);
             }
         }
 
@@ -456,7 +513,7 @@
         }
 
         function increaseSpeed() {
-            obstacleSpeed = Math.min(obstacleSpeed + 0.5, 10);
+            obstacleSpeed = Math.min(obstacleSpeed + 1 * scaleFactor, 10 * scaleFactor); // Increased from 0.5 to 1
         }
 
         function showMemeOverlay(text, duration) {
@@ -470,12 +527,14 @@
                 const feather = document.createElement('div');
                 feather.className = 'feather';
                 feather.style.backgroundColor = i % 2 === 0 ? '#ffffff' : '#ffff00';
-                feather.style.left = `${chicken.x + Math.random() * 60}px`;
-                feather.style.top = `${chicken.y + Math.random() * 60}px`;
+                feather.style.left = `${chicken.x + Math.random() * 60 * scaleFactor}px`;
+                feather.style.top = `${chicken.y + Math.random() * 60 * scaleFactor}px`;
+                feather.style.width = `${20 * scaleFactor}px`;
+                feather.style.height = `${20 * scaleFactor}px`;
                 effectsContainer.appendChild(feather);
 
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 1 + Math.random() * 3;
+                const speed = (1 + Math.random() * 3) * scaleFactor;
                 const startTime = Date.now();
                 const duration = 1000 + Math.random() * 1000;
 
