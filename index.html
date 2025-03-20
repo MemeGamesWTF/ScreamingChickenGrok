@@ -31,12 +31,6 @@
             margin-bottom: 10px;
         }
 
-        @media (min-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-        }
-
         #game-container {
             position: relative;
             width: 100%;
@@ -44,85 +38,16 @@
             text-align: center;
         }
 
-        #game-area {
+        #game-canvas {
             width: 100%;
             height: 50vh;
             min-height: 250px;
             max-height: 400px;
             border: 5px solid #ff6b6b;
             border-radius: 15px;
-            position: relative;
-            background-image: url('img/bg.jpg');
-            background-size: auto 400px;
-            background-repeat: repeat-x;
-            background-position: 0 bottom;
-            overflow: hidden;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
-            animation: none;
-        }
-
-        @keyframes scrollBackground {
-            from { background-position: 0 bottom; }
-            to { background-position: -800px bottom; }
-        }
-
-        #chicken {
-            position: absolute;
-            bottom: 20px;
-            left: 50px;
-            width: 60px;
-            height: 60px;
-            background-image: url('img/chicken.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transition: transform 0.1s ease;
-            filter: drop-shadow(0 0 10px yellow);
-            z-index: 10;
-        }
-
-        @media (min-width: 768px) {
-            #chicken {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        .chicken-jump {
-            animation: jump 0.7s ease;
-        }
-
-        @keyframes jump {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-250px) rotate(20deg); }
-            80% { transform: translateY(-250px) rotate(20deg); }
-            100% { transform: translateY(0); }
-        }
-
-        .chicken-scream {
-            animation: scream 0.5s ease;
-        }
-
-        @keyframes scream {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.5); }
-            100% { transform: scale(1); }
-        }
-
-        #obstacle {
-            position: absolute;
-            right: -100px; /* Increased from -60px */
-            bottom: 0;
-            width: 100px; /* Increased from 60px */
-            height: 100px; /* Increased from 60px */
-            background-size: contain;
-            background-repeat: no-repeat;
-            animation: none;
-            z-index: 5;
-        }
-
-        @keyframes moveObstacle {
-            from { right: -100px; } /* Increased from -60px */
-            to { right: 100%; }
+            display: block;
+            background-color: #000;
         }
 
         #score {
@@ -171,12 +96,6 @@
             padding: 20px;
         }
 
-        @media (min-width: 768px) {
-            #meme-overlay {
-                font-size: 72px;
-            }
-        }
-
         #game-over {
             position: absolute;
             top: 0;
@@ -194,12 +113,6 @@
             text-align: center;
             padding: 20px;
             z-index: 100;
-        }
-
-        @media (min-width: 768px) {
-            #game-over {
-                font-size: 32px;
-            }
         }
 
         button {
@@ -221,10 +134,6 @@
             transform: scale(1.1);
         }
 
-        button:active {
-            transform: scale(0.95);
-        }
-
         #instructions {
             margin-top: 10px;
             font-size: 18px;
@@ -232,12 +141,6 @@
             padding: 10px;
             border-radius: 10px;
             text-align: center;
-        }
-
-        @media (min-width: 768px) {
-            #instructions {
-                font-size: 24px;
-            }
         }
 
         #achievements {
@@ -259,26 +162,10 @@
             font-size: 14px;
         }
 
-        @media (min-width: 768px) {
-            .achievement {
-                font-size: 16px;
-            }
-        }
-
         .achievement.unlocked {
             background-color: #ffff00;
             color: #000;
             opacity: 1;
-        }
-
-        #effects-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
         }
 
         .feather {
@@ -288,7 +175,17 @@
             background-color: #ffffff;
             border-radius: 50%;
             opacity: 0.7;
-            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; }
+            #score { font-size: 18px; }
+            #meme-overlay { font-size: 24px; }
+            #game-over { font-size: 18px; }
+            button { padding: 8px 16px; font-size: 16px; }
+            #instructions { font-size: 14px; }
+            .achievement { font-size: 12px; }
+            .feather { width: 15px; height: 15px; }
         }
     </style>
 </head>
@@ -296,19 +193,16 @@
     <div id="game-container">
         <h1>CHICKEN YELL 🐔</h1>
         
-        <div id="game-area">
-            <div id="chicken"></div>
-            <div id="obstacle"></div>
-            <div id="score">Score: 0</div>
-            <div id="meme-overlay"></div>
-            <div id="effects-container"></div>
-            
-            <div id="game-over">
-                <h2>GAME OVER!</h2>
-                <p>You got <span id="final-score">0</span> points!</p>
-                <p id="meme-comment">Congrats, you're as loud as a rubber chicken!</p>
-                <button id="restart-button">PLAY AGAIN</button>
-            </div>
+        <canvas id="game-canvas"></canvas>
+        <div id="score">Score: 0</div>
+        <div id="meme-overlay"></div>
+        <div id="effects-container"></div>
+        
+        <div id="game-over">
+            <h2>GAME OVER!</h2>
+            <p>You got <span id="final-score">0</span> points!</p>
+            <p id="meme-comment">Congrats, you're as loud as a rubber chicken!</p>
+            <button id="restart-button">PLAY AGAIN</button>
         </div>
         
         <div id="volume-meter">
@@ -324,17 +218,18 @@
         
         <div id="achievements">
             <h3>Achievements</h3>
-            <div class="achievement" id="achievement-1">🎯 First Jump</div>
-            <div class="achievement" id="achievement-2">🌟 Reach 10 points</div>
-            <div class="achievement" id="achievement-3">🔥 Reach 50 points</div>
-            <div class="achievement" id="achievement-4">🚀 5 Consecutive Jumps</div>
-            <div class="achievement" id="achievement-5">🎤 Scream like a Superstar</div>
+            <div class="achievement" id="achievement-1">🎯 FIRST JUMP</div>
+            <div class="achievement" id="achievement-2">🌟 REACH 10 POINTS</div>
+            <div class="achievement" id="achievement-3">🔥 REACH 50 POINTS</div>
+            <div class="achievement" id="achievement-4">🚀 5 CONSECUTIVE JUMPS</div>
+            <div class="achievement" id="achievement-5">🎤 SCREAM LIKE A SUPERSTAR</div>
         </div>
     </div>
 
     <script>
-        const chicken = document.getElementById('chicken');
-        const obstacle = document.getElementById('obstacle');
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('game-container');
         const scoreElement = document.getElementById('score');
         const volumeBar = document.getElementById('volume-bar');
         const startButton = document.getElementById('start-button');
@@ -344,12 +239,25 @@
         const memeComment = document.getElementById('meme-comment');
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
-        const gameArea = document.getElementById('game-area');
 
+        function resizeCanvas() {
+            const containerWidth = gameContainer.clientWidth;
+            canvas.width = Math.min(containerWidth, 800);
+            canvas.height = Math.min(containerWidth * 0.5, 400);
+            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
+            console.log(`Canvas resized: ${canvas.width}x${canvas.height}, scaleFactor: ${scaleFactor}`);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
+        let chicken = { x: 0, y: 0, width: 0, height: 0, vy: 0 };
+        let obstacle = { x: 0, y: 0, width: 0, height: 0 };
+        let bgX = 0;
         let isJumping = false;
         let score = 0;
         let gameActive = false;
-        let obstacleSpeed = 2;
+        let obstacleSpeed = 0;
         let consecutiveJumps = 0;
         let stream = null;
         let audioContext = null;
@@ -357,78 +265,47 @@
         let dataArray = null;
         let animationFrame = null;
         let achievements = {
-            "achievement-1": false,
-            "achievement-2": false,
-            "achievement-3": false,
-            "achievement-4": false,
-            "achievement-5": false
+            "achievement-1": false, "achievement-2": false, "achievement-3": false,
+            "achievement-4": false, "achievement-5": false
         };
-        
-        let jumpPhase = 'none';
-        let jumpDuration = 700;
-        let collisionDisabled = false;
+        let smoothedVolume = 0;
+        let currentObstacleIndex = 0;
 
         const memePhrases = [
-            "BAWK BAWK!",
-            "CHICKEN POWER!",
-            "CLUCK YEAAAH!",
-            "COCK-A-DOODLE-DOO!",
-            "CHICKEN RUN!",
-            "FEATHERS FLYING!",
-            "CLUCKING INSANE!",
-            "FOWL PLAY!",
-            "EGG-CELLENT!",
-            "WING IT!",
-            "BEAK PERFORMANCE!",
-            "CHICKEN OUT!"
+            "BAWK BAWK!", "CHICKEN POWER!", "CLUCK YEAAAH!", "COCK-A-DOODLE-DOO!",
+            "CHICKEN RUN!", "FEATHERS FLYING!", "CLUCKING INSANE!", "FOWL PLAY!",
+            "EGG-CELLENT!", "WING IT!", "BEAK PERFORMANCE!", "CHICKEN OUT!"
         ];
 
         const gameOverComments = [
-            "You scream like a rubber chicken!",
-            "Your neighbors probably hate you now!",
-            "RIP headphone users!",
-            "You're the cock of the walk!",
-            "Even Colonel Sanders is impressed!",
-            "Your vocal cords deserve a medal!",
-            "Did you wake up your mom?",
-            "Your throat OK, buddy?",
-            "10/10 would cluck again!",
-            "Epic chicken noises!"
-        ];
-
-        const obstacleImages = [
-            'img/obs1.png',
-            'img/obs2.png',
-            'img/obs3.png',
-            'img/obs4.png',
-            'img/obs5.png',
-            'img/obs6.png',
-            'img/obs7.png'
+            "YOU SCREAM LIKE A RUBBER CHICKEN!", "YOUR NEIGHBORS PROBABLY HATE YOU NOW!",
+            "RIP HEADPHONE USERS!", "YOU'RE THE COCK OF THE WALK!", 
+            "EVEN COLONEL SANDERS IS IMPRESSED!", "YOUR VOCAL CORDS DESERVE A MEDAL!",
+            "DID YOU WAKE UP YOUR MOM?", "YOUR THROAT OK, BUDDY?", 
+            "10/10 WOULD CLUCK AGAIN!", "EPIC CHICKEN NOISES!"
         ];
 
         function startGame() {
+            console.log("startGame called");
+            resizeCanvas();
+            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
             resetGame();
-            
-            if (!stream) {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(streamData => {
-                        stream = streamData;
-                        setupAudio();
-                        startGameLoop();
-                        startObstacles();
-                    })
-                    .catch(err => {
-                        console.error("Microphone access denied:", err);
-                        alert("Please allow microphone access to play!");
-                        showStartButton();
-                    });
-            } else {
-                startGameLoop();
-                startObstacles();
-            }
+            gameActive = true;
+            startGameLoop(); // Start immediately for testing
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(streamData => {
+                    console.log("Microphone access granted");
+                    stream = streamData;
+                    setupAudio();
+                })
+                .catch(err => {
+                    console.error("Microphone access denied:", err);
+                    alert("Microphone access denied. Game running without audio control.");
+                });
         }
-        
+
         function setupAudio() {
+            console.log("Setting up audio");
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             const microphone = audioContext.createMediaStreamSource(stream);
@@ -436,196 +313,173 @@
             analyser.fftSize = 256;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
         }
-        
+
         function resetGame() {
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-            }
-            
+            console.log("resetGame called");
+            if (animationFrame) cancelAnimationFrame(animationFrame);
             score = 0;
             updateScore();
-            gameActive = true;
-            obstacleSpeed = 2;
+            obstacleSpeed = 4 * scaleFactor;
             isJumping = false;
-            jumpPhase = 'none';
-            collisionDisabled = false;
-            
+
+            // Chicken (hardcoded size for testing)
+            chicken.width = 80 * scaleFactor;
+            chicken.height = 80 * scaleFactor; // Square for simplicity
+            chicken.x = 50 * scaleFactor;
+            chicken.y = canvas.height - chicken.height;
+            chicken.vy = 0;
+
+            obstacle.x = canvas.width;
+            changeObstacleImage();
+            bgX = 0;
             startButton.style.display = 'none';
             gameOverScreen.style.display = 'none';
-            
-            obstacle.style.animation = 'none';
-            obstacle.style.right = '-100px'; // Increased from -60px
-            changeObstacleImage();
-            
-            chicken.classList.remove('chicken-jump');
-            chicken.classList.remove('chicken-scream');
-            
-            gameArea.style.animation = 'none';
-            void gameArea.offsetWidth;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
-            
             updateAchievementsDisplay();
-        }
-        
-        function startObstacles() {
-            obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
         }
 
         function startGameLoop() {
+            console.log("startGameLoop called");
             let lastJumpTime = 0;
-            
-            function checkVolume() {
+
+            function gameLoop() {
                 if (!gameActive) return;
-                
-                analyser.getByteFrequencyData(dataArray);
-                let volume = 0;
-                
-                for (let i = 0; i < dataArray.length; i++) {
-                    volume += dataArray[i] * (i / dataArray.length + 0.5);
+
+                console.log("Game loop running");
+
+                if (analyser && dataArray) {
+                    analyser.getByteFrequencyData(dataArray);
+                    let volume = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        volume += dataArray[i] * (i / dataArray.length + 0.5);
+                    }
+                    volume = volume / dataArray.length;
+                    smoothedVolume = smoothedVolume * 0.9 + volume * 0.1;
+                    volumeBar.style.width = `${Math.min(smoothedVolume * 2, 100)}%`;
+                } else {
+                    smoothedVolume = 0;
                 }
-                volume = volume / dataArray.length;
-                
-                volumeBar.style.width = `${Math.min(volume * 2, 100)}%`;
-                
-                if (volume > 40 && !isJumping) {
-                    jumpChicken(volume);
+
+                if (smoothedVolume > 25 && !isJumping) {
+                    jumpChicken(smoothedVolume);
                     consecutiveJumps++;
                     lastJumpTime = Date.now();
-                    
                     if (consecutiveJumps >= 5 && !achievements["achievement-4"]) {
                         unlockAchievement("achievement-4");
                     }
                 }
-                
-                if (Date.now() - lastJumpTime > 1500) {
-                    consecutiveJumps = 0;
+
+                if (Date.now() - lastJumpTime > 1500) consecutiveJumps = 0;
+
+                if (isJumping) {
+                    chicken.y += chicken.vy;
+                    if (chicken.y >= canvas.height - chicken.height) {
+                        chicken.y = canvas.height - chicken.height;
+                        isJumping = false;
+                    }
                 }
-                
-                if (!collisionDisabled && isColliding()) {
+
+                obstacle.x -= obstacleSpeed;
+                if (obstacle.x < -obstacle.width) {
+                    obstacle.x = canvas.width;
+                    score++;
+                    updateScore();
+                    if (score > 0 && score % 5 === 0) increaseSpeed();
+                    changeObstacleImage();
+                }
+
+                bgX -= obstacleSpeed / 2;
+                if (bgX <= -canvas.width) bgX += canvas.width;
+
+                if (isColliding()) {
                     gameOver();
                     return;
                 }
-                
-                animationFrame = requestAnimationFrame(checkVolume);
+
+                // Render with no image dependency
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00f'; // Blue background
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#f00'; // Red chicken
+                ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
+
+                ctx.fillStyle = '#0f0'; // Green obstacle
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+                animationFrame = requestAnimationFrame(gameLoop);
             }
 
-            animationFrame = requestAnimationFrame(checkVolume);
+            animationFrame = requestAnimationFrame(gameLoop);
+        }
+
+        function changeObstacleImage() {
+            currentObstacleIndex = (currentObstacleIndex + 1) % 5; // Cycle through 0-4
+            // Reduced obstacle size
+            if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
+                obstacle.width = 60 * scaleFactor; // Reduced from 80
+            } else {
+                obstacle.width = 90 * scaleFactor; // Reduced from 120
+            }
+            obstacle.height = obstacle.width; // Square for simplicity
+            obstacle.y = canvas.height - obstacle.height;
         }
 
         function jumpChicken(volume) {
             if (!isJumping) {
                 isJumping = true;
-                jumpPhase = 'rising';
-                
-                if (!achievements["achievement-1"]) {
-                    unlockAchievement("achievement-1");
-                }
-                
-                let jumpHeight = Math.min(volume * 3, 400);
-                chicken.style.setProperty('--jump-height', `-${jumpHeight}px`);
-                
-                chicken.classList.add('chicken-jump');
-                collisionDisabled = true;
-                
+                chicken.vy = -Math.min(volume * 2, 20) * scaleFactor;
+                if (!achievements["achievement-1"]) unlockAchievement("achievement-1");
                 if (volume > 80 && !achievements["achievement-5"]) {
                     unlockAchievement("achievement-5");
                     showMemeOverlay("SUPER SCREAM!", 2000);
                 }
-                
                 if (volume > 60) {
                     const randomMeme = memePhrases[Math.floor(Math.random() * memePhrases.length)];
                     showMemeOverlay(randomMeme, 800);
-                    chicken.classList.add('chicken-scream');
                     createFeatherEffect();
                 }
-                
-                setTimeout(() => {
-                    jumpPhase = 'plateau';
-                }, jumpDuration * 0.5);
-                
-                setTimeout(() => {
-                    jumpPhase = 'falling';
-                    collisionDisabled = false;
-                }, jumpDuration * 0.8);
-                
-                setTimeout(() => {
-                    chicken.classList.remove('chicken-jump');
-                    chicken.classList.remove('chicken-scream');
-                    isJumping = false;
-                    jumpPhase = 'none';
-                    collisionDisabled = false;
-                }, jumpDuration);
+                setTimeout(() => chicken.vy = 10 * scaleFactor, 500);
             }
         }
 
         function isColliding() {
-            const chickenRect = chicken.getBoundingClientRect();
-            const obstacleRect = obstacle.getBoundingClientRect();
-            
-            const buffer = 10;
-            
             return (
-                chickenRect.right - buffer > obstacleRect.left &&
-                chickenRect.left + buffer < obstacleRect.right &&
-                chickenRect.bottom - buffer > obstacleRect.top &&
-                chickenRect.top + buffer < obstacleRect.bottom
+                chicken.x + chicken.width > obstacle.x &&
+                chicken.x < obstacle.x + obstacle.width &&
+                chicken.y + chicken.height > obstacle.y &&
+                chicken.y < obstacle.y + obstacle.height
             );
         }
 
         function gameOver() {
             gameActive = false;
-            obstacle.style.animation = 'none';
-            gameArea.style.animation = 'none';
             finalScoreElement.textContent = score;
             gameOverScreen.style.display = 'flex';
-            
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            
+            if (animationFrame) cancelAnimationFrame(animationFrame);
             memeComment.textContent = gameOverComments[Math.floor(Math.random() * gameOverComments.length)];
+            showStartButton();
         }
 
         function showStartButton() {
             startButton.style.display = 'block';
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function updateScore() {
             scoreElement.textContent = `Score: ${score}`;
-            
-            if (score >= 10 && !achievements["achievement-2"]) {
-                unlockAchievement("achievement-2");
-            }
-            if (score >= 50 && !achievements["achievement-3"]) {
-                unlockAchievement("achievement-3");
-            }
+            if (score >= 10 && !achievements["achievement-2"]) unlockAchievement("achievement-2");
+            if (score >= 50 && !achievements["achievement-3"]) unlockAchievement("achievement-3");
         }
 
         function increaseSpeed() {
-            obstacleSpeed = Math.max(0.8, obstacleSpeed * 0.9);
-            obstacle.style.animation = 'none';
-            void obstacle.offsetWidth;
-            obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
-            
-            changeObstacleImage();
-        }
-
-        function changeObstacleImage() {
-            const randomImage = obstacleImages[Math.floor(Math.random() * obstacleImages.length)];
-            obstacle.style.backgroundImage = `url('${randomImage}')`;
-            obstacle.style.width = '100px'; // Increased from 60px
-            obstacle.style.height = '100px'; // Increased from 60px
+            obstacleSpeed = Math.min(obstacleSpeed + 1 * scaleFactor, 10 * scaleFactor);
         }
 
         function showMemeOverlay(text, duration) {
             memeOverlay.textContent = text;
             memeOverlay.style.opacity = '1';
-            setTimeout(() => {
-                memeOverlay.style.opacity = '0';
-            }, duration);
+            setTimeout(() => memeOverlay.style.opacity = '0', duration);
         }
 
         function createFeatherEffect() {
@@ -633,19 +487,20 @@
                 const feather = document.createElement('div');
                 feather.className = 'feather';
                 feather.style.backgroundColor = i % 2 === 0 ? '#ffffff' : '#ffff00';
-                feather.style.left = `${chicken.offsetLeft + Math.random() * 60}px`;
-                feather.style.top = `${chicken.offsetTop + Math.random() * 60}px`;
+                feather.style.left = `${chicken.x + Math.random() * 60 * scaleFactor}px`;
+                feather.style.top = `${chicken.y + Math.random() * 60 * scaleFactor}px`;
+                feather.style.width = `${20 * scaleFactor}px`;
+                feather.style.height = `${20 * scaleFactor}px`;
                 effectsContainer.appendChild(feather);
-                
+
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 1 + Math.random() * 3;
+                const speed = (1 + Math.random() * 3) * scaleFactor;
                 const startTime = Date.now();
                 const duration = 1000 + Math.random() * 1000;
-                
+
                 function animateFeather() {
                     const elapsed = Date.now() - startTime;
                     const progress = elapsed / duration;
-                    
                     if (progress < 1) {
                         feather.style.left = `${parseFloat(feather.style.left) + Math.cos(angle) * speed}px`;
                         feather.style.top = `${parseFloat(feather.style.top) + Math.sin(angle) * speed + progress * 2}px`;
@@ -655,7 +510,6 @@
                         feather.remove();
                     }
                 }
-                
                 animateFeather();
             }
         }
@@ -663,67 +517,37 @@
         function unlockAchievement(id) {
             achievements[id] = true;
             updateAchievementsDisplay();
-            showMemeOverlay("Achievement Unlocked!", 1500);
+            showMemeOverlay("ACHIEVEMENT UNLOCKED!", 1500);
         }
-        
+
         function updateAchievementsDisplay() {
             for (const id in achievements) {
                 const element = document.getElementById(id);
-                if (achievements[id]) {
-                    element.classList.add('unlocked');
-                }
+                if (achievements[id]) element.classList.add('unlocked');
             }
         }
 
-        obstacle.addEventListener('animationiteration', () => {
-            score++;
-            updateScore();
-            
-            if (gameActive && score > 0 && score % 5 === 0) {
-                increaseSpeed();
-            }
-        });
-
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
-        
+
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && gameActive) {
-                obstacle.style.animationPlayState = 'paused';
-                gameArea.style.animationPlayState = 'paused';
-                if (animationFrame) {
-                    cancelAnimationFrame(animationFrame);
-                    animationFrame = null;
-                }
+                if (animationFrame) cancelAnimationFrame(animationFrame);
             } else if (!document.hidden && gameActive) {
-                obstacle.style.animationPlayState = 'running';
-                gameArea.style.animationPlayState = 'running';
                 startGameLoop();
             }
         });
-        
-        window.addEventListener('resize', () => {
-            if (gameActive) {
-                obstacle.style.animation = 'none';
-                void obstacle.offsetWidth;
-                obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-                gameArea.style.animation = 'none';
-                void gameArea.offsetWidth;
-                gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
-            }
-        });
-        
+
         document.addEventListener('touchstart', () => {
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         });
-        
+
         document.addEventListener('click', () => {
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         });
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 </html>
