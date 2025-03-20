@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Yell!</title>
+    <title>ULTIMATE SCREAMING CHICKEN</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,8 @@
             flex-direction: column;
             align-items: center;
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-color: #000;
+            background-image: url('/api/placeholder/800/600');
+            background-size: cover;
             color: #fff;
             text-shadow: 2px 2px 4px #000;
             overflow-x: hidden;
@@ -52,29 +53,17 @@
             border: 5px solid #ff6b6b;
             border-radius: 15px;
             position: relative;
-            background-image: url('img/bg.jpg'); /* Farm-themed background */
-            background-size: auto 400px; /* Adjust to your farm bg height */
-            background-repeat: repeat-x;
-            background-position: 0 bottom;
+            background-image: url('/api/placeholder/800/400');
+            background-size: cover;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
-            animation: none;
-        }
-
-        @keyframes scrollBackground {
-            from { background-position: 0 bottom; }
-            to { background-position: -800px bottom; } /* Adjust to your bg width */
         }
 
         #chicken {
+            font-size: 40px;
             position: absolute;
             bottom: 20px;
             left: 50px;
-            width: 60px;
-            height: 60px;
-            background-image: url('img/chicken.png');
-            background-size: contain;
-            background-repeat: no-repeat;
             transition: transform 0.1s ease;
             filter: drop-shadow(0 0 10px yellow);
             z-index: 10;
@@ -82,25 +71,19 @@
 
         @media (min-width: 768px) {
             #chicken {
-                width: 80px;
-                height: 80px;
+                font-size: 60px;
             }
         }
 
         .chicken-jump {
-            animation: jump 0.7s ease, flap 0.2s infinite alternate;
+            animation: jump 0.7s ease;
         }
 
         @keyframes jump {
             0% { transform: translateY(0); }
-            50% { transform: translateY(-250px) rotate(10deg); }
-            80% { transform: translateY(-250px) rotate(10deg); }
+            50% { transform: translateY(-250px) rotate(20deg); }
+            80% { transform: translateY(-250px) rotate(20deg); }
             100% { transform: translateY(0); }
-        }
-
-        @keyframes flap {
-            0% { transform: translateY(-5px) rotate(-5deg); }
-            100% { transform: translateY(5px) rotate(5deg); }
         }
 
         .chicken-scream {
@@ -114,19 +97,18 @@
         }
 
         #obstacle {
+            font-size: 30px;
             position: absolute;
-            right: -60px;
+            right: -50px;
             bottom: 0;
-            width: 60px;
-            height: 60px;
-            background-size: contain;
-            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             animation: none;
-            z-index: 5;
         }
 
         @keyframes moveObstacle {
-            from { right: -60px; }
+            from { right: -50px; }
             to { right: 100%; }
         }
 
@@ -288,23 +270,22 @@
 
         .feather {
             position: absolute;
-            width: 15px;
-            height: 15px;
+            width: 20px;
+            height: 20px;
             background-color: #ffffff;
             border-radius: 50%;
-            opacity: 0.8;
+            opacity: 0.7;
             z-index: 5;
-            transform: rotate(45deg);
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <h1>Chicken Yell! 🐔</h1>
+        <h1>ULTIMATE SCREAMING CHICKEN 🐔</h1>
         
         <div id="game-area">
-            <div id="chicken"></div>
-            <div id="obstacle"></div>
+            <div id="chicken">🐔</div>
+            <div id="obstacle">🌵</div>
             <div id="score">Score: 0</div>
             <div id="meme-overlay"></div>
             <div id="effects-container"></div>
@@ -322,25 +303,21 @@
         </div>
         
         <div id="instructions">
-            <p>YELL LOUDER = JUMP HIGHER! 🔊</p>
-            <p>Dodge the farm obstacles and rack up points!</p>
+            <p>SCREAM LOUDER = JUMP HIGHER! 🔊</p>
+            <p>Avoid the obstacles and earn points!</p>
         </div>
         
-        <button id="start-button">START YELLING</button>
+        <button id="start-button">START SCREAMING</button>
         
         <div id="achievements">
             <h3>Achievements</h3>
-            <div class="achievement" id="achievement-1">🎯 First Flap</div>
+            <div class="achievement" id="achievement-1">🎯 First Jump</div>
             <div class="achievement" id="achievement-2">🌟 Reach 10 points</div>
             <div class="achievement" id="achievement-3">🔥 Reach 50 points</div>
             <div class="achievement" id="achievement-4">🚀 5 Consecutive Jumps</div>
-            <div class="achievement" id="achievement-5">🎤 Yell like a Rooster</div>
+            <div class="achievement" id="achievement-5">🎤 Scream like a Superstar</div>
         </div>
     </div>
-
-    <!-- Audio Elements -->
-    <audio id="cluck-sound" src="https://www.myinstants.com/media/sounds/chicken-cluck.mp3" preload="auto"></audio>
-    <audio id="bg-music" src="https://www.myinstants.com/media/sounds/farm-ambience.mp3" preload="auto" loop></audio>
 
     <script>
         const chicken = document.getElementById('chicken');
@@ -354,9 +331,6 @@
         const memeComment = document.getElementById('meme-comment');
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
-        const gameArea = document.getElementById('game-area');
-        const cluckSound = document.getElementById('cluck-sound');
-        const bgMusic = document.getElementById('bg-music');
 
         let isJumping = false;
         let score = 0;
@@ -381,41 +355,39 @@
         let collisionDisabled = false;
 
         const memePhrases = [
-            "CLUCK YEAH!",
-            "FARM FLYER!",
-            "YELL-O-TRON!",
-            "ROOSTER RUSH!",
-            "FEATHER FRENZY!",
-            "BARN BURNER!",
-            "CHICKEN BLAST!",
-            "PECK POWER!",
-            "CROW CRAZY!",
-            "WING WONDER!",
-            "YOLK YELL!",
-            "FLAPTASTIC!"
+            "BAWK BAWK!",
+            "CHICKEN POWER!",
+            "CLUCK YEAAAH!",
+            "COCK-A-DOODLE-DOO!",
+            "CHICKEN RUN!",
+            "FEATHERS FLYING!",
+            "CLUCKING INSANE!",
+            "FOWL PLAY!",
+            "EGG-CELLENT!",
+            "WING IT!",
+            "BEAK PERFORMANCE!",
+            "CHICKEN OUT!"
         ];
 
         const gameOverComments = [
-            "You yelled like a true farm champ!",
-            "The cows are jealous of your lungs!",
-            "RIP the farmer’s eardrums!",
-            "Cock-a-doodle-DONE!",
-            "Your yell scared the pigs!",
-            "Feathers everywhere, nice one!",
-            "The barn’s still ringing!",
-            "Did the rooster file a noise complaint?",
-            "10/10 farmyard chaos!",
-            "Epic cluckin’ effort!"
+            "You scream like a rubber chicken!",
+            "Your neighbors probably hate you now!",
+            "RIP headphone users!",
+            "You're the cock of the walk!",
+            "Even Colonel Sanders is impressed!",
+            "Your vocal cords deserve a medal!",
+            "Did you wake up your mom?",
+            "Your throat OK, buddy?",
+            "10/10 would cluck again!",
+            "Epic chicken noises!"
         ];
 
-        const obstacleImages = [
-            'img/obs1.png',
-            'img/obs2.png',
-            'img/obs3.png',
-            'img/obs4.png',
-            'img/obs5.png',
-            'img/obs6.png',
-            'img/obs7.png'
+        const obstacleTypes = [
+            { emoji: "🌵", size: "30px" },
+            { emoji: "🪨", size: "30px" },
+            { emoji: "🌲", size: "35px" },
+            { emoji: "🧱", size: "25px" },
+            { emoji: "🪓", size: "25px" }
         ];
 
         function startGame() {
@@ -428,7 +400,6 @@
                         setupAudio();
                         startGameLoop();
                         startObstacles();
-                        bgMusic.play(); // Start background music
                     })
                     .catch(err => {
                         console.error("Microphone access denied:", err);
@@ -438,7 +409,6 @@
             } else {
                 startGameLoop();
                 startObstacles();
-                bgMusic.play();
             }
         }
         
@@ -468,23 +438,16 @@
             gameOverScreen.style.display = 'none';
             
             obstacle.style.animation = 'none';
-            obstacle.style.right = '-60px';
-            changeObstacleImage();
+            obstacle.style.right = '-50px';
             
             chicken.classList.remove('chicken-jump');
             chicken.classList.remove('chicken-scream');
             
-            gameArea.style.animation = 'none';
-            void gameArea.offsetWidth;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
-            
             updateAchievementsDisplay();
-            bgMusic.currentTime = 0; // Reset music to start
         }
         
         function startObstacles() {
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
         }
 
         function startGameLoop() {
@@ -517,6 +480,7 @@
                     consecutiveJumps = 0;
                 }
                 
+                // Simplified collision check - only when not jumping or in falling phase
                 if (!collisionDisabled && isColliding()) {
                     gameOver();
                     return;
@@ -541,20 +505,18 @@
                 chicken.style.setProperty('--jump-height', `-${jumpHeight}px`);
                 
                 chicken.classList.add('chicken-jump');
-                cluckSound.currentTime = 0; // Reset cluck sound
-                cluckSound.play(); // Play cluck sound
                 collisionDisabled = true;
                 
                 if (volume > 80 && !achievements["achievement-5"]) {
                     unlockAchievement("achievement-5");
-                    showMemeOverlay("ROOSTER POWER!", 2000);
+                    showMemeOverlay("SUPER SCREAM!", 2000);
                 }
                 
                 if (volume > 60) {
                     const randomMeme = memePhrases[Math.floor(Math.random() * memePhrases.length)];
                     showMemeOverlay(randomMeme, 800);
                     chicken.classList.add('chicken-scream');
-                    createFeatherEffect(volume);
+                    createFeatherEffect();
                 }
                 
                 setTimeout(() => {
@@ -563,7 +525,7 @@
                 
                 setTimeout(() => {
                     jumpPhase = 'falling';
-                    collisionDisabled = false;
+                    collisionDisabled = false; // Enable collision check when falling
                 }, jumpDuration * 0.8);
                 
                 setTimeout(() => {
@@ -580,7 +542,8 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
-            const buffer = 10;
+            // Reduced buffer for smaller obstacles
+            const buffer = 10; // Changed from 15 to account for smaller obstacle size
             
             return (
                 chickenRect.right - buffer > obstacleRect.left &&
@@ -593,10 +556,8 @@
         function gameOver() {
             gameActive = false;
             obstacle.style.animation = 'none';
-            gameArea.style.animation = 'none';
             finalScoreElement.textContent = score;
             gameOverScreen.style.display = 'flex';
-            bgMusic.pause(); // Stop background music
             
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
@@ -626,16 +587,14 @@
             obstacle.style.animation = 'none';
             void obstacle.offsetWidth;
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
             
-            changeObstacleImage();
+            changeObstacleType();
         }
 
-        function changeObstacleImage() {
-            const randomImage = obstacleImages[Math.floor(Math.random() * obstacleImages.length)];
-            obstacle.style.backgroundImage = `url('${randomImage}')`;
-            obstacle.style.width = '60px';
-            obstacle.style.height = '60px';
+        function changeObstacleType() {
+            const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+            obstacle.textContent = randomType.emoji;
+            obstacle.style.fontSize = randomType.size;
         }
 
         function showMemeOverlay(text, duration) {
@@ -646,20 +605,19 @@
             }, duration);
         }
 
-        function createFeatherEffect(volume) {
-            const featherCount = Math.floor(volume / 20) + 5;
-            for (let i = 0; i < featherCount; i++) {
+        function createFeatherEffect() {
+            for (let i = 0; i < 10; i++) {
                 const feather = document.createElement('div');
                 feather.className = 'feather';
-                feather.style.backgroundColor = i % 3 === 0 ? '#ffffff' : i % 3 === 1 ? '#ffff99' : '#ffcc66';
-                feather.style.left = `${chicken.offsetLeft + Math.random() * 60 - 30}px`;
-                feather.style.top = `${chicken.offsetTop + Math.random() * 60 - 30}px`;
+                feather.style.backgroundColor = i % 2 === 0 ? '#ffffff' : '#ffff00';
+                feather.style.left = `${chicken.offsetLeft + Math.random() * 60}px`;
+                feather.style.top = `${chicken.offsetTop + Math.random() * 60}px`;
                 effectsContainer.appendChild(feather);
                 
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 1 + Math.random() * 4;
+                const speed = 1 + Math.random() * 3;
                 const startTime = Date.now();
-                const duration = 800 + Math.random() * 800;
+                const duration = 1000 + Math.random() * 1000;
                 
                 function animateFeather() {
                     const elapsed = Date.now() - startTime;
@@ -709,16 +667,12 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && gameActive) {
                 obstacle.style.animationPlayState = 'paused';
-                gameArea.style.animationPlayState = 'paused';
-                bgMusic.pause();
                 if (animationFrame) {
                     cancelAnimationFrame(animationFrame);
                     animationFrame = null;
                 }
             } else if (!document.hidden && gameActive) {
                 obstacle.style.animationPlayState = 'running';
-                gameArea.style.animationPlayState = 'running';
-                bgMusic.play();
                 startGameLoop();
             }
         });
@@ -728,9 +682,6 @@
                 obstacle.style.animation = 'none';
                 void obstacle.offsetWidth;
                 obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
-                gameArea.style.animation = 'none';
-                void gameArea.offsetWidth;
-                gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
             }
         });
         
