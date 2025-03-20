@@ -291,7 +291,7 @@
             scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
             resetGame();
             gameActive = true;
-            startGameLoop(); // Start immediately for testing
+            startGameLoop();
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(streamData => {
                     console.log("Microphone access granted");
@@ -322,9 +322,8 @@
             obstacleSpeed = 4 * scaleFactor;
             isJumping = false;
 
-            // Chicken (hardcoded size for testing)
             chicken.width = 80 * scaleFactor;
-            chicken.height = 80 * scaleFactor; // Square for simplicity
+            chicken.height = 80 * scaleFactor;
             chicken.x = 50 * scaleFactor;
             chicken.y = canvas.height - chicken.height;
             chicken.vy = 0;
@@ -395,15 +394,14 @@
                     return;
                 }
 
-                // Render with no image dependency
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#00f'; // Blue background
+                ctx.fillStyle = '#00f';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#f00'; // Red chicken
+                ctx.fillStyle = '#f00';
                 ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
 
-                ctx.fillStyle = '#0f0'; // Green obstacle
+                ctx.fillStyle = '#0f0';
                 ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
                 animationFrame = requestAnimationFrame(gameLoop);
@@ -413,14 +411,13 @@
         }
 
         function changeObstacleImage() {
-            currentObstacleIndex = (currentObstacleIndex + 1) % 5; // Cycle through 0-4
-            // Reduced obstacle size
+            currentObstacleIndex = (currentObstacleIndex + 1) % 5; // Only 0-4 (obs1-obs5)
             if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
-                obstacle.width = 60 * scaleFactor; // Reduced from 80
+                obstacle.width = 50 * scaleFactor; // Reduced from 60
             } else {
-                obstacle.width = 90 * scaleFactor; // Reduced from 120
+                obstacle.width = 75 * scaleFactor; // Reduced from 90
             }
-            obstacle.height = obstacle.width; // Square for simplicity
+            obstacle.height = obstacle.width; // Square for now
             obstacle.y = canvas.height - obstacle.height;
         }
 
