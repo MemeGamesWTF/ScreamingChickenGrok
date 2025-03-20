@@ -18,8 +18,7 @@
             flex-direction: column;
             align-items: center;
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-image: url('/api/placeholder/800/600');
-            background-size: cover;
+            background-color: #000;
             color: #fff;
             text-shadow: 2px 2px 4px #000;
             overflow-x: hidden;
@@ -53,17 +52,29 @@
             border: 5px solid #ff6b6b;
             border-radius: 15px;
             position: relative;
-            background-image: url('/api/placeholder/800/400');
-            background-size: cover;
+            background-image: url('img/bg.jpg');
+            background-size: auto 400px; /* Adjust to your bg.png height */
+            background-repeat: repeat-x;
+            background-position: 0 bottom;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+            animation: none;
+        }
+
+        @keyframes scrollBackground {
+            from { background-position: 0 bottom; }
+            to { background-position: -800px bottom; } /* Adjust to your bg.png width */
         }
 
         #chicken {
-            font-size: 40px;
             position: absolute;
             bottom: 20px;
             left: 50px;
+            width: 60px;
+            height: 60px;
+            background-image: url('img/chicken.png');
+            background-size: contain;
+            background-repeat: no-repeat;
             transition: transform 0.1s ease;
             filter: drop-shadow(0 0 10px yellow);
             z-index: 10;
@@ -71,7 +82,8 @@
 
         @media (min-width: 768px) {
             #chicken {
-                font-size: 60px;
+                width: 80px;
+                height: 80px;
             }
         }
 
@@ -97,18 +109,19 @@
         }
 
         #obstacle {
-            font-size: 30px;
             position: absolute;
-            right: -50px;
+            right: -60px; /* Adjusted to match new width */
             bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 60px; /* Increased from 40px */
+            height: 60px; /* Increased from 40px */
+            background-size: contain;
+            background-repeat: no-repeat;
             animation: none;
+            z-index: 5;
         }
 
         @keyframes moveObstacle {
-            from { right: -50px; }
+            from { right: -60px; } /* Adjusted to match new width */
             to { right: 100%; }
         }
 
@@ -284,8 +297,8 @@
         <h1>ULTIMATE SCREAMING CHICKEN 🐔</h1>
         
         <div id="game-area">
-            <div id="chicken">🐔</div>
-            <div id="obstacle">🌵</div>
+            <div id="chicken"></div>
+            <div id="obstacle"></div>
             <div id="score">Score: 0</div>
             <div id="meme-overlay"></div>
             <div id="effects-container"></div>
@@ -331,6 +344,7 @@
         const memeComment = document.getElementById('meme-comment');
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
+        const gameArea = document.getElementById('game-area');
 
         let isJumping = false;
         let score = 0;
@@ -382,12 +396,14 @@
             "Epic chicken noises!"
         ];
 
-        const obstacleTypes = [
-            { emoji: "🌵", size: "30px" },
-            { emoji: "🪨", size: "30px" },
-            { emoji: "🌲", size: "35px" },
-            { emoji: "🧱", size: "25px" },
-            { emoji: "🪓", size: "25px" }
+        const obstacleImages = [
+            'img/obs1.png',
+            'img/obs2.png',
+            'img/obs3.png',
+            'img/obs4.png',
+            'img/obs5.png',
+            'img/obs6.png',
+            'img/obs7.png'
         ];
 
         function startGame() {
@@ -438,16 +454,22 @@
             gameOverScreen.style.display = 'none';
             
             obstacle.style.animation = 'none';
-            obstacle.style.right = '-50px';
+            obstacle.style.right = '-60px';
+            changeObstacleImage();
             
             chicken.classList.remove('chicken-jump');
             chicken.classList.remove('chicken-scream');
+            
+            gameArea.style.animation = 'none';
+            void gameArea.offsetWidth;
+            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
             
             updateAchievementsDisplay();
         }
         
         function startObstacles() {
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
+            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
         }
 
         function startGameLoop() {
@@ -480,7 +502,6 @@
                     consecutiveJumps = 0;
                 }
                 
-                // Simplified collision check - only when not jumping or in falling phase
                 if (!collisionDisabled && isColliding()) {
                     gameOver();
                     return;
@@ -525,7 +546,7 @@
                 
                 setTimeout(() => {
                     jumpPhase = 'falling';
-                    collisionDisabled = false; // Enable collision check when falling
+                    collisionDisabled = false;
                 }, jumpDuration * 0.8);
                 
                 setTimeout(() => {
@@ -542,8 +563,7 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
-            // Reduced buffer for smaller obstacles
-            const buffer = 10; // Changed from 15 to account for smaller obstacle size
+            const buffer = 10;
             
             return (
                 chickenRect.right - buffer > obstacleRect.left &&
@@ -556,6 +576,7 @@
         function gameOver() {
             gameActive = false;
             obstacle.style.animation = 'none';
+            gameArea.style.animation = 'none';
             finalScoreElement.textContent = score;
             gameOverScreen.style.display = 'flex';
             
@@ -587,14 +608,16 @@
             obstacle.style.animation = 'none';
             void obstacle.offsetWidth;
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
+            gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
             
-            changeObstacleType();
+            changeObstacleImage();
         }
 
-        function changeObstacleType() {
-            const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-            obstacle.textContent = randomType.emoji;
-            obstacle.style.fontSize = randomType.size;
+        function changeObstacleImage() {
+            const randomImage = obstacleImages[Math.floor(Math.random() * obstacleImages.length)];
+            obstacle.style.backgroundImage = `url('${randomImage}')`;
+            obstacle.style.width = '60px'; // Updated size
+            obstacle.style.height = '60px'; // Updated size
         }
 
         function showMemeOverlay(text, duration) {
@@ -667,12 +690,14 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && gameActive) {
                 obstacle.style.animationPlayState = 'paused';
+                gameArea.style.animationPlayState = 'paused';
                 if (animationFrame) {
                     cancelAnimationFrame(animationFrame);
                     animationFrame = null;
                 }
             } else if (!document.hidden && gameActive) {
                 obstacle.style.animationPlayState = 'running';
+                gameArea.style.animationPlayState = 'running';
                 startGameLoop();
             }
         });
@@ -682,6 +707,9 @@
                 obstacle.style.animation = 'none';
                 void obstacle.offsetWidth;
                 obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
+                gameArea.style.animation = 'none';
+                void gameArea.offsetWidth;
+                gameArea.style.animation = `scrollBackground ${obstacleSpeed * 5}s linear infinite`;
             }
         });
         
