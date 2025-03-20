@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Impact', sans-serif; /* Changed to Impact */
             background-color: #000;
             color: #fff;
             text-shadow: 2px 2px 4px #000;
@@ -53,6 +53,7 @@
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
             display: block;
+            background-color: #000; /* Black initial background */
         }
 
         #score {
@@ -148,7 +149,7 @@
             font-weight: bold;
             cursor: pointer;
             margin: 10px;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Impact', sans-serif; /* Changed to Impact */
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.7);
             transition: transform 0.1s ease;
         }
@@ -283,9 +284,16 @@
             const containerWidth = gameContainer.clientWidth;
             canvas.width = Math.min(containerWidth, 800);
             canvas.height = Math.min(containerWidth * 0.5, 400);
+            if (!gameActive) {
+                ctx.fillStyle = '#000'; // Keep black until game starts
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
         }
         resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            if (gameActive) resetGame(); // Only reset if game is active
+        });
 
         const bgImage = new Image();
         bgImage.src = 'img/bg.jpg';
@@ -301,13 +309,13 @@
         });
 
         let scaleFactor = canvas.width / 800;
-        let chicken = { x: 50 * scaleFactor, y: 0, width: 80 * scaleFactor, height: 80 * scaleFactor, vy: 0 };
+        let chicken = { x: 0, y: 0, width: 0, height: 0, vy: 0 };
         let obstacle = { x: canvas.width, y: 0, width: 0, height: 0 };
         let bgX = 0;
         let isJumping = false;
         let score = 0;
         let gameActive = false;
-        let obstacleSpeed = 4 * scaleFactor; // Increased from 2 to 4
+        let obstacleSpeed = 4 * scaleFactor;
         let consecutiveJumps = 0;
         let stream = null;
         let audioContext = null;
@@ -328,14 +336,26 @@
         ];
 
         const gameOverComments = [
-            "You scream like a rubber chicken!", "Your neighbors probably hate you now!",
-            "RIP headphone users!", "You're the cock of the walk!", 
-            "Even Colonel Sanders is impressed!", "Your vocal cords deserve a medal!",
-            "Did you wake up your mom?", "Your throat OK, buddy?", 
-            "10/10 would cluck again!", "Epic chicken noises!"
+            "YOU SCREAM LIKE A RUBBER CHICKEN!", "YOUR NEIGHBORS PROBABLY HATE YOU NOW!",
+            "RIP HEADPHONE USERS!", "YOU'RE THE COCK OF THE WALK!", 
+            "EVEN COLONEL SANDERS IS IMPRESSED!", "YOUR VOCAL CORDS DESERVE A MEDAL!",
+            "DID YOU WAKE UP YOUR MOM?", "YOUR THROAT OK, BUDDY?", 
+            "10/10 WOULD CLUCK AGAIN!", "EPIC CHICKEN NOISES!"
         ];
 
+        // Wait for images to load
+        let imagesLoaded = 0;
+        const totalImages = obstacleImages.length + 2;
+        function checkImagesLoaded() {
+            imagesLoaded++;
+            if (imagesLoaded === totalImages && gameActive) startGameLoop();
+        }
+        bgImage.onload = checkImagesLoaded;
+        chickenImage.onload = checkImagesLoaded;
+        obstacleImages.forEach(img => img.onload = checkImagesLoaded);
+
         function startGame() {
+            gameActive = true; // Set game as active
             resetGame();
             if (!stream) {
                 navigator.mediaDevices.getUserMedia({ audio: true })
@@ -368,16 +388,17 @@
             scaleFactor = canvas.width / 800;
             score = 0;
             updateScore();
-            gameActive = true;
-            obstacleSpeed = 4 * scaleFactor; // Increased from 2 to 4
+            obstacleSpeed = 4 * scaleFactor;
+
+            // Chicken dimensions preserving aspect ratio
+            const chickenAspect = chickenImage.naturalWidth / chickenImage.naturalHeight;
+            chicken.width = 80 * scaleFactor;
+            chicken.height = chicken.width / chickenAspect;
+            chicken.x = 50 * scaleFactor;
+            chicken.y = canvas.height - chicken.height;
+            chicken.vy = 0;
             isJumping = false;
-            chicken = { 
-                x: 50 * scaleFactor, 
-                y: canvas.height - 80 * scaleFactor, 
-                width: 80 * scaleFactor, 
-                height: 80 * scaleFactor, 
-                vy: 0 
-            };
+
             obstacle.x = canvas.width;
             bgX = 0;
             startButton.style.display = 'none';
@@ -387,6 +408,7 @@
         }
 
         function startGameLoop() {
+            if (!gameActive) return;
             let lastJumpTime = 0;
 
             function gameLoop() {
@@ -444,8 +466,10 @@
 
                 // Render
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(bgImage, bgX, 0, canvas.width, canvas.height);
-                ctx.drawImage(bgImage, bgX + canvas.width, 0, canvas.width, canvas.height);
+                const bgHeight = canvas.height;
+                const bgWidth = bgHeight * (bgImage.naturalWidth / bgImage.naturalHeight);
+                ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
+                ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
                 ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
                 ctx.drawImage(obstacleImages[currentObstacleIndex], obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
@@ -457,13 +481,14 @@
 
         function changeObstacleImage() {
             currentObstacleIndex = Math.floor(Math.random() * obstacleImages.length);
+            const obstacleImage = obstacleImages[currentObstacleIndex];
+            const aspectRatio = obstacleImage.naturalWidth / obstacleImage.naturalHeight;
             if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
                 obstacle.width = 80 * scaleFactor;
-                obstacle.height = 80 * scaleFactor;
             } else {
                 obstacle.width = 120 * scaleFactor;
-                obstacle.height = 120 * scaleFactor;
             }
+            obstacle.height = obstacle.width / aspectRatio;
             obstacle.y = canvas.height - obstacle.height;
         }
 
@@ -504,6 +529,8 @@
 
         function showStartButton() {
             startButton.style.display = 'block';
+            ctx.fillStyle = '#000'; // Reset to black when game ends
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function updateScore() {
@@ -513,7 +540,7 @@
         }
 
         function increaseSpeed() {
-            obstacleSpeed = Math.min(obstacleSpeed + 1 * scaleFactor, 10 * scaleFactor); // Increased from 0.5 to 1
+            obstacleSpeed = Math.min(obstacleSpeed + 1 * scaleFactor, 10 * scaleFactor);
         }
 
         function showMemeOverlay(text, duration) {
@@ -557,7 +584,7 @@
         function unlockAchievement(id) {
             achievements[id] = true;
             updateAchievementsDisplay();
-            showMemeOverlay("Achievement Unlocked!", 1500);
+            showMemeOverlay("ACHIEVEMENT UNLOCKED!", 1500);
         }
 
         function updateAchievementsDisplay() {
@@ -585,6 +612,10 @@
         document.addEventListener('click', () => {
             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         });
+
+        // Initial black screen
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 </html>
