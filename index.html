@@ -411,13 +411,14 @@
         }
 
         function changeObstacleImage() {
-            currentObstacleIndex = (currentObstacleIndex + 1) % 5; // Only 0-4 (obs1-obs5)
+            currentObstacleIndex = (currentObstacleIndex + 1) % 5;
+            // Further reduced obstacle size
             if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
-                obstacle.width = 50 * scaleFactor; // Reduced from 60
+                obstacle.width = 50 * scaleFactor; // From 60 to 50
             } else {
-                obstacle.width = 75 * scaleFactor; // Reduced from 90
+                obstacle.width = 70 * scaleFactor; // From 90 to 70
             }
-            obstacle.height = obstacle.width; // Square for now
+            obstacle.height = obstacle.width; // Square obstacles
             obstacle.y = canvas.height - obstacle.height;
         }
 
