@@ -245,6 +245,7 @@
             canvas.width = Math.min(containerWidth, 800);
             canvas.height = Math.min(containerWidth * 0.5, 400);
             scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
+            console.log(`Canvas resized: ${canvas.width}x${canvas.height}, scaleFactor: ${scaleFactor}`);
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -298,29 +299,27 @@
         ];
 
         function startGame() {
+            console.log("startGame called");
             resizeCanvas();
             scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
             resetGame();
-            if (!stream) {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(streamData => {
-                        stream = streamData;
-                        setupAudio();
-                        gameActive = true;
-                        startGameLoop();
-                    })
-                    .catch(err => {
-                        console.error("Microphone access denied:", err);
-                        alert("Please allow microphone access to play!");
-                        showStartButton();
-                    });
-            } else {
-                gameActive = true;
-                startGameLoop();
-            }
+            gameActive = true;
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(streamData => {
+                    console.log("Microphone access granted");
+                    stream = streamData;
+                    setupAudio();
+                    startGameLoop();
+                })
+                .catch(err => {
+                    console.error("Microphone access denied:", err);
+                    alert("Microphone access denied. Game will start without audio control.");
+                    startGameLoop(); // Start anyway without audio
+                });
         }
 
         function setupAudio() {
+            console.log("Setting up audio");
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             const microphone = audioContext.createMediaStreamSource(stream);
@@ -330,6 +329,7 @@
         }
 
         function resetGame() {
+            console.log("resetGame called");
             if (animationFrame) cancelAnimationFrame(animationFrame);
             score = 0;
             updateScore();
@@ -352,19 +352,27 @@
         }
 
         function startGameLoop() {
+            console.log("startGameLoop called");
             let lastJumpTime = 0;
 
             function gameLoop() {
                 if (!gameActive) return;
 
-                analyser.getByteFrequencyData(dataArray);
-                let volume = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    volume += dataArray[i] * (i / dataArray.length + 0.5);
+                console.log("Game loop running");
+
+                // Audio processing (if available)
+                if (analyser && dataArray) {
+                    analyser.getByteFrequencyData(dataArray);
+                    let volume = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        volume += dataArray[i] * (i / dataArray.length + 0.5);
+                    }
+                    volume = volume / dataArray.length;
+                    smoothedVolume = smoothedVolume * 0.9 + volume * 0.1;
+                    volumeBar.style.width = `${Math.min(smoothedVolume * 2, 100)}%`;
+                } else {
+                    smoothedVolume = 0; // No audio, no jump
                 }
-                volume = volume / dataArray.length;
-                smoothedVolume = smoothedVolume * 0.9 + volume * 0.1;
-                volumeBar.style.width = `${Math.min(smoothedVolume * 2, 100)}%`;
 
                 if (smoothedVolume > 25 && !isJumping) {
                     jumpChicken(smoothedVolume);
@@ -402,28 +410,27 @@
                     return;
                 }
 
-                // Render with fallback
+                // Render
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00f'; // Blue background as fallback
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
                 const bgWidth = canvas.width;
                 const bgHeight = bgWidth * (bgImage.naturalHeight / bgImage.naturalWidth || 1);
                 if (bgImage.complete) {
                     ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
                     ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
-                } else {
-                    ctx.fillStyle = '#00f'; // Blue fallback if background not loaded
-                    ctx.fillRect(bgX, 0, bgWidth, canvas.height);
-                    ctx.fillRect(bgX + bgWidth, 0, bgWidth, canvas.height);
                 }
                 if (chickenImage.complete) {
                     ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
                 } else {
-                    ctx.fillStyle = '#f00'; // Red fallback for chicken
+                    ctx.fillStyle = '#f00';
                     ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
                 }
                 if (obstacleImages[currentObstacleIndex].complete) {
                     ctx.drawImage(obstacleImages[currentObstacleIndex], obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                 } else {
-                    ctx.fillStyle = '#0f0'; // Green fallback for obstacle
+                    ctx.fillStyle = '#0f0';
                     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                 }
 
@@ -484,7 +491,7 @@
 
         function showStartButton() {
             startButton.style.display = 'block';
-            ctx.fillStyle = '#000'; // Reset to black when game ends
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
