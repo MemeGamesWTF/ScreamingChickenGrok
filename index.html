@@ -76,12 +76,13 @@
         }
 
         .chicken-jump {
-            animation: jump 0.5s ease;
+            animation: jump 0.7s ease; /* Increased animation duration */
         }
 
         @keyframes jump {
             0% { transform: translateY(0); }
             50% { transform: translateY(-150px) rotate(20deg); }
+            80% { transform: translateY(-150px) rotate(20deg); } /* Added a plateau phase */
             100% { transform: translateY(0); }
         }
 
@@ -349,11 +350,11 @@
             "achievement-5": false
         };
         
-        // Added a grace period flag for safer landings
-        let landingGracePeriod = false;
-        
-        // Jump animation phases tracking
-        let jumpPhase = 'none'; // 'none', 'rising', 'falling'
+        // Extended variables for better collision detection
+        let jumpPhase = 'none'; // 'none', 'rising', 'plateau', 'falling'
+        let jumpDuration = 700; // Matches the CSS animation duration in ms
+        let safeDuringJump = true; // Safe during most of the jump
+        let collisionDisabled = false; // Flag to disable collision temporarily
 
         // Fun meme phrases
         const memePhrases = [
@@ -435,8 +436,8 @@
             gameActive = true;
             obstacleSpeed = 2;
             isJumping = false;
-            landingGracePeriod = false;
             jumpPhase = 'none';
+            collisionDisabled = false;
             
             // Hide/show UI elements
             startButton.style.display = 'none';
@@ -487,34 +488,15 @@
                     }
                 }
                 
-                // Track jump phases for better collision detection
-                if (isJumping) {
-                    // Get the current transform of the chicken
-                    const transform = window.getComputedStyle(chicken).transform;
-                    if (transform !== 'none') {
-                        // Extract the translateY value (simplistic approach)
-                        const matrix = new DOMMatrix(transform);
-                        const translateY = matrix.m42;
-                        
-                        // Determine jump phase
-                        if (translateY < -20) {
-                            jumpPhase = 'rising';
-                        } else if (translateY > -20 && jumpPhase === 'rising') {
-                            jumpPhase = 'falling';
-                        }
-                    }
-                }
-                
                 // Reset consecutive jumps if no jump happens within 1.5 seconds
                 if (Date.now() - lastJumpTime > 1500) {
                     consecutiveJumps = 0;
                 }
                 
-                // Collision detection - but only if not in landing grace period
-                if (!landingGracePeriod && isColliding()) {
-                    // Only count collision if chicken is not in the upward phase of jump
-                    // and we're not in the landing grace period
-                    if (jumpPhase !== 'rising') {
+                // Collision detection only if we're not disabling it
+                if (!collisionDisabled && isColliding()) {
+                    // Check if we're in a critical phase of the jump
+                    if (jumpPhase === 'falling') {
                         gameOver();
                         return;
                     }
@@ -544,6 +526,9 @@
                 // Add jump animation
                 chicken.classList.add('chicken-jump');
                 
+                // Disable collision during most of the jump
+                collisionDisabled = true;
+                
                 // Super loud scream achievement
                 if (volume > 80 && !achievements["achievement-5"]) {
                     unlockAchievement("achievement-5");
@@ -558,20 +543,27 @@
                     createFeatherEffect();
                 }
                 
-                // Set a grace period for landing (about 80% through the jump animation)
+                // Track jump phases with more precision
+                // Rising phase - first 50% of animation
                 setTimeout(() => {
-                    landingGracePeriod = true;
+                    jumpPhase = 'plateau';
+                }, jumpDuration * 0.5);
+                
+                // Plateau phase - from 50% to 80% of animation
+                setTimeout(() => {
                     jumpPhase = 'falling';
-                }, 400);
+                    // We're more vulnerable in falling phase but still provide some safety
+                    collisionDisabled = false;
+                }, jumpDuration * 0.8);
                 
                 // End jump animation and reset states
                 setTimeout(() => {
                     chicken.classList.remove('chicken-jump');
                     chicken.classList.remove('chicken-scream');
                     isJumping = false;
-                    landingGracePeriod = false;
                     jumpPhase = 'none';
-                }, 500);
+                    collisionDisabled = false;
+                }, jumpDuration);
             }
         }
 
@@ -579,8 +571,8 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
-            // Add a small buffer to make collisions more forgiving
-            const buffer = 10;
+            // Add a larger buffer to make collisions more forgiving
+            const buffer = 15;
             
             return (
                 chickenRect.right - buffer > obstacleRect.left &&
