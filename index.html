@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Impact', sans-serif;
             background-color: #000;
             color: #fff;
             text-shadow: 2px 2px 4px #000;
@@ -53,7 +53,7 @@
             border-radius: 15px;
             position: relative;
             background-image: url('img/bg.jpg');
-            background-size: auto 400px; /* Adjust to your bg.png height */
+            background-size: auto 400px;
             background-repeat: repeat-x;
             background-position: 0 bottom;
             overflow: hidden;
@@ -63,7 +63,7 @@
 
         @keyframes scrollBackground {
             from { background-position: 0 bottom; }
-            to { background-position: -800px bottom; } /* Adjust to your bg.png width */
+            to { background-position: -800px bottom; }
         }
 
         #chicken {
@@ -110,10 +110,10 @@
 
         #obstacle {
             position: absolute;
-            right: -60px; /* Adjusted to match new width */
+            right: -100px; /* Increased from -60px */
             bottom: 0;
-            width: 60px; /* Increased from 40px */
-            height: 60px; /* Increased from 40px */
+            width: 100px; /* Increased from 60px */
+            height: 100px; /* Increased from 60px */
             background-size: contain;
             background-repeat: no-repeat;
             animation: none;
@@ -121,7 +121,7 @@
         }
 
         @keyframes moveObstacle {
-            from { right: -60px; } /* Adjusted to match new width */
+            from { right: -100px; } /* Increased from -60px */
             to { right: 100%; }
         }
 
@@ -212,7 +212,7 @@
             font-weight: bold;
             cursor: pointer;
             margin: 10px;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Impact', sans-serif;
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.7);
             transition: transform 0.1s ease;
         }
@@ -454,7 +454,7 @@
             gameOverScreen.style.display = 'none';
             
             obstacle.style.animation = 'none';
-            obstacle.style.right = '-60px';
+            obstacle.style.right = '-100px'; // Increased from -60px
             changeObstacleImage();
             
             chicken.classList.remove('chicken-jump');
@@ -616,8 +616,8 @@
         function changeObstacleImage() {
             const randomImage = obstacleImages[Math.floor(Math.random() * obstacleImages.length)];
             obstacle.style.backgroundImage = `url('${randomImage}')`;
-            obstacle.style.width = '60px'; // Updated size
-            obstacle.style.height = '60px'; // Updated size
+            obstacle.style.width = '100px'; // Increased from 60px
+            obstacle.style.height = '100px'; // Increased from 60px
         }
 
         function showMemeOverlay(text, duration) {
