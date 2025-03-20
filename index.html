@@ -352,7 +352,6 @@
         
         let jumpPhase = 'none';
         let jumpDuration = 700;
-        let safeDuringJump = true;
         let collisionDisabled = false;
 
         const memePhrases = [
@@ -481,11 +480,10 @@
                     consecutiveJumps = 0;
                 }
                 
+                // Simplified collision check - only when not jumping or in falling phase
                 if (!collisionDisabled && isColliding()) {
-                    if (jumpPhase === 'falling') {
-                        gameOver();
-                        return;
-                    }
+                    gameOver();
+                    return;
                 }
                 
                 animationFrame = requestAnimationFrame(checkVolume);
@@ -527,7 +525,7 @@
                 
                 setTimeout(() => {
                     jumpPhase = 'falling';
-                    collisionDisabled = false;
+                    collisionDisabled = false; // Enable collision check when falling
                 }, jumpDuration * 0.8);
                 
                 setTimeout(() => {
@@ -544,7 +542,8 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
-            const buffer = 15;
+            // Reduced buffer for smaller obstacles
+            const buffer = 10; // Changed from 15 to account for smaller obstacle size
             
             return (
                 chickenRect.right - buffer > obstacleRect.left &&
