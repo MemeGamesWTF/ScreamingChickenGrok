@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: 'Impact', sans-serif; /* Changed to Impact */
+            font-family: 'Impact', sans-serif;
             background-color: #000;
             color: #fff;
             text-shadow: 2px 2px 4px #000;
@@ -29,12 +29,6 @@
             font-size: 2rem;
             text-align: center;
             margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5rem;
-            }
         }
 
         #game-container {
@@ -53,7 +47,7 @@
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
             display: block;
-            background-color: #000; /* Black initial background */
+            background-color: #000;
         }
 
         #score {
@@ -64,12 +58,6 @@
             font-weight: bold;
             color: #ffff00;
             text-shadow: 2px 2px 4px #000;
-        }
-
-        @media (max-width: 768px) {
-            #score {
-                font-size: 18px;
-            }
         }
 
         #volume-meter {
@@ -108,12 +96,6 @@
             padding: 20px;
         }
 
-        @media (max-width: 768px) {
-            #meme-overlay {
-                font-size: 24px;
-            }
-        }
-
         #game-over {
             position: absolute;
             top: 0;
@@ -133,12 +115,6 @@
             z-index: 100;
         }
 
-        @media (max-width: 768px) {
-            #game-over {
-                font-size: 18px;
-            }
-        }
-
         button {
             background-color: #ff6b6b;
             color: white;
@@ -149,20 +125,13 @@
             font-weight: bold;
             cursor: pointer;
             margin: 10px;
-            font-family: 'Impact', sans-serif; /* Changed to Impact */
+            font-family: 'Impact', sans-serif;
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.7);
             transition: transform 0.1s ease;
         }
 
         button:hover {
             transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            button {
-                padding: 8px 16px;
-                font-size: 16px;
-            }
         }
 
         #instructions {
@@ -172,12 +141,6 @@
             padding: 10px;
             border-radius: 10px;
             text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            #instructions {
-                font-size: 14px;
-            }
         }
 
         #achievements {
@@ -199,12 +162,6 @@
             font-size: 14px;
         }
 
-        @media (max-width: 768px) {
-            .achievement {
-                font-size: 12px;
-            }
-        }
-
         .achievement.unlocked {
             background-color: #ffff00;
             color: #000;
@@ -220,7 +177,30 @@
             opacity: 0.7;
         }
 
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            #score {
+                font-size: 18px;
+            }
+            #meme-overlay {
+                font-size: 24px;
+            }
+            #game-over {
+                font-size: 18px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+            #instructions {
+                font-size: 14px;
+            }
+            .achievement {
+                font-size: 12px;
+            }
             .feather {
                 width: 15px;
                 height: 15px;
@@ -257,11 +237,11 @@
         
         <div id="achievements">
             <h3>Achievements</h3>
-            <div class="achievement" id="achievement-1">🎯 First Jump</div>
-            <div class="achievement" id="achievement-2">🌟 Reach 10 points</div>
-            <div class="achievement" id="achievement-3">🔥 Reach 50 points</div>
-            <div class="achievement" id="achievement-4">🚀 5 Consecutive Jumps</div>
-            <div class="achievement" id="achievement-5">🎤 Scream like a Superstar</div>
+            <div class="achievement" id="achievement-1">🎯 FIRST JUMP</div>
+            <div class="achievement" id="achievement-2">🌟 REACH 10 POINTS</div>
+            <div class="achievement" id="achievement-3">🔥 REACH 50 POINTS</div>
+            <div class="achievement" id="achievement-4">🚀 5 CONSECUTIVE JUMPS</div>
+            <div class="achievement" id="achievement-5">🎤 SCREAM LIKE A SUPERSTAR</div>
         </div>
     </div>
 
@@ -279,21 +259,14 @@
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
 
-        // Dynamically set canvas size
+        // Canvas sizing
         function resizeCanvas() {
             const containerWidth = gameContainer.clientWidth;
             canvas.width = Math.min(containerWidth, 800);
             canvas.height = Math.min(containerWidth * 0.5, 400);
-            if (!gameActive) {
-                ctx.fillStyle = '#000'; // Keep black until game starts
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
         }
         resizeCanvas();
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            if (gameActive) resetGame(); // Only reset if game is active
-        });
+        window.addEventListener('resize', resizeCanvas);
 
         const bgImage = new Image();
         bgImage.src = 'img/bg.jpg';
@@ -310,12 +283,12 @@
 
         let scaleFactor = canvas.width / 800;
         let chicken = { x: 0, y: 0, width: 0, height: 0, vy: 0 };
-        let obstacle = { x: canvas.width, y: 0, width: 0, height: 0 };
+        let obstacle = { x: 0, y: 0, width: 0, height: 0 };
         let bgX = 0;
         let isJumping = false;
         let score = 0;
         let gameActive = false;
-        let obstacleSpeed = 4 * scaleFactor;
+        let obstacleSpeed = 0;
         let consecutiveJumps = 0;
         let stream = null;
         let audioContext = null;
@@ -343,25 +316,16 @@
             "10/10 WOULD CLUCK AGAIN!", "EPIC CHICKEN NOISES!"
         ];
 
-        // Wait for images to load
-        let imagesLoaded = 0;
-        const totalImages = obstacleImages.length + 2;
-        function checkImagesLoaded() {
-            imagesLoaded++;
-            if (imagesLoaded === totalImages && gameActive) startGameLoop();
-        }
-        bgImage.onload = checkImagesLoaded;
-        chickenImage.onload = checkImagesLoaded;
-        obstacleImages.forEach(img => img.onload = checkImagesLoaded);
-
         function startGame() {
-            gameActive = true; // Set game as active
+            resizeCanvas(); // Ensure proper sizing on start
+            scaleFactor = canvas.width / 800;
             resetGame();
             if (!stream) {
                 navigator.mediaDevices.getUserMedia({ audio: true })
                     .then(streamData => {
                         stream = streamData;
                         setupAudio();
+                        gameActive = true;
                         startGameLoop();
                     })
                     .catch(err => {
@@ -370,6 +334,7 @@
                         showStartButton();
                     });
             } else {
+                gameActive = true;
                 startGameLoop();
             }
         }
@@ -385,30 +350,29 @@
 
         function resetGame() {
             if (animationFrame) cancelAnimationFrame(animationFrame);
-            scaleFactor = canvas.width / 800;
             score = 0;
             updateScore();
             obstacleSpeed = 4 * scaleFactor;
+            isJumping = false;
 
-            // Chicken dimensions preserving aspect ratio
-            const chickenAspect = chickenImage.naturalWidth / chickenImage.naturalHeight;
+            // Chicken
+            const chickenAspect = chickenImage.naturalWidth / chickenImage.naturalHeight || 1;
             chicken.width = 80 * scaleFactor;
             chicken.height = chicken.width / chickenAspect;
             chicken.x = 50 * scaleFactor;
             chicken.y = canvas.height - chicken.height;
             chicken.vy = 0;
-            isJumping = false;
 
+            // Obstacle
             obstacle.x = canvas.width;
+            changeObstacleImage();
             bgX = 0;
             startButton.style.display = 'none';
             gameOverScreen.style.display = 'none';
-            changeObstacleImage();
             updateAchievementsDisplay();
         }
 
         function startGameLoop() {
-            if (!gameActive) return;
             let lastJumpTime = 0;
 
             function gameLoop() {
@@ -467,7 +431,7 @@
                 // Render
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const bgHeight = canvas.height;
-                const bgWidth = bgHeight * (bgImage.naturalWidth / bgImage.naturalHeight);
+                const bgWidth = bgHeight * (bgImage.naturalWidth / bgImage.naturalHeight || 1);
                 ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
                 ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
                 ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
@@ -482,7 +446,7 @@
         function changeObstacleImage() {
             currentObstacleIndex = Math.floor(Math.random() * obstacleImages.length);
             const obstacleImage = obstacleImages[currentObstacleIndex];
-            const aspectRatio = obstacleImage.naturalWidth / obstacleImage.naturalHeight;
+            const aspectRatio = obstacleImage.naturalWidth / obstacleImage.naturalHeight || 1;
             if (currentObstacleIndex === 0 || currentObstacleIndex === 1) {
                 obstacle.width = 80 * scaleFactor;
             } else {
@@ -525,12 +489,11 @@
             gameOverScreen.style.display = 'flex';
             if (animationFrame) cancelAnimationFrame(animationFrame);
             memeComment.textContent = gameOverComments[Math.floor(Math.random() * gameOverComments.length)];
+            showStartButton();
         }
 
         function showStartButton() {
             startButton.style.display = 'block';
-            ctx.fillStyle = '#000'; // Reset to black when game ends
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function updateScore() {
@@ -612,10 +575,6 @@
         document.addEventListener('click', () => {
             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         });
-
-        // Initial black screen
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 </html>
