@@ -177,34 +177,15 @@
             opacity: 0.7;
         }
 
-        /* Mobile responsiveness */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            #score {
-                font-size: 18px;
-            }
-            #meme-overlay {
-                font-size: 24px;
-            }
-            #game-over {
-                font-size: 18px;
-            }
-            button {
-                padding: 8px 16px;
-                font-size: 16px;
-            }
-            #instructions {
-                font-size: 14px;
-            }
-            .achievement {
-                font-size: 12px;
-            }
-            .feather {
-                width: 15px;
-                height: 15px;
-            }
+            h1 { font-size: 1.5rem; }
+            #score { font-size: 18px; }
+            #meme-overlay { font-size: 24px; }
+            #game-over { font-size: 18px; }
+            button { padding: 8px 16px; font-size: 16px; }
+            #instructions { font-size: 14px; }
+            .achievement { font-size: 12px; }
+            .feather { width: 15px; height: 15px; }
         }
     </style>
 </head>
@@ -259,12 +240,11 @@
         const memeOverlay = document.getElementById('meme-overlay');
         const effectsContainer = document.getElementById('effects-container');
 
-        // Canvas sizing
         function resizeCanvas() {
             const containerWidth = gameContainer.clientWidth;
             canvas.width = Math.min(containerWidth, 800);
             canvas.height = Math.min(containerWidth * 0.5, 400);
-            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400); // Use smaller scale for consistency
+            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -356,7 +336,6 @@
             obstacleSpeed = 4 * scaleFactor;
             isJumping = false;
 
-            // Chicken
             const chickenAspect = chickenImage.naturalWidth / chickenImage.naturalHeight || 1;
             chicken.width = 80 * scaleFactor;
             chicken.height = chicken.width / chickenAspect;
@@ -364,7 +343,6 @@
             chicken.y = canvas.height - chicken.height;
             chicken.vy = 0;
 
-            // Obstacle
             obstacle.x = canvas.width;
             changeObstacleImage();
             bgX = 0;
@@ -379,7 +357,6 @@
             function gameLoop() {
                 if (!gameActive) return;
 
-                // Audio processing
                 analyser.getByteFrequencyData(dataArray);
                 let volume = 0;
                 for (let i = 0; i < dataArray.length; i++) {
@@ -400,7 +377,6 @@
 
                 if (Date.now() - lastJumpTime > 1500) consecutiveJumps = 0;
 
-                // Update physics
                 if (isJumping) {
                     chicken.y += chicken.vy;
                     if (chicken.y >= canvas.height - chicken.height) {
@@ -409,7 +385,6 @@
                     }
                 }
 
-                // Move obstacle
                 obstacle.x -= obstacleSpeed;
                 if (obstacle.x < -obstacle.width) {
                     obstacle.x = canvas.width;
@@ -419,24 +394,38 @@
                     changeObstacleImage();
                 }
 
-                // Move background
                 bgX -= obstacleSpeed / 2;
                 if (bgX <= -canvas.width) bgX += canvas.width;
 
-                // Collision detection
                 if (isColliding()) {
                     gameOver();
                     return;
                 }
 
-                // Render
+                // Render with fallback
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const bgWidth = canvas.width; // Fill canvas width
-                const bgHeight = bgWidth * (bgImage.naturalHeight / bgImage.naturalWidth || 1); // Preserve aspect ratio
-                ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
-                ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
-                ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
-                ctx.drawImage(obstacleImages[currentObstacleIndex], obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                const bgWidth = canvas.width;
+                const bgHeight = bgWidth * (bgImage.naturalHeight / bgImage.naturalWidth || 1);
+                if (bgImage.complete) {
+                    ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
+                    ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
+                } else {
+                    ctx.fillStyle = '#00f'; // Blue fallback if background not loaded
+                    ctx.fillRect(bgX, 0, bgWidth, canvas.height);
+                    ctx.fillRect(bgX + bgWidth, 0, bgWidth, canvas.height);
+                }
+                if (chickenImage.complete) {
+                    ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
+                } else {
+                    ctx.fillStyle = '#f00'; // Red fallback for chicken
+                    ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height);
+                }
+                if (obstacleImages[currentObstacleIndex].complete) {
+                    ctx.drawImage(obstacleImages[currentObstacleIndex], obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                } else {
+                    ctx.fillStyle = '#0f0'; // Green fallback for obstacle
+                    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                }
 
                 animationFrame = requestAnimationFrame(gameLoop);
             }
@@ -495,6 +484,8 @@
 
         function showStartButton() {
             startButton.style.display = 'block';
+            ctx.fillStyle = '#000'; // Reset to black when game ends
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function updateScore() {
@@ -576,6 +567,10 @@
         document.addEventListener('click', () => {
             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         });
+
+        // Initial black screen
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     </script>
 </body>
 </html>
