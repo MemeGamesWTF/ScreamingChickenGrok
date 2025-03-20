@@ -348,6 +348,12 @@
             "achievement-4": false,
             "achievement-5": false
         };
+        
+        // Added a grace period flag for safer landings
+        let landingGracePeriod = false;
+        
+        // Jump animation phases tracking
+        let jumpPhase = 'none'; // 'none', 'rising', 'falling'
 
         // Fun meme phrases
         const memePhrases = [
@@ -428,6 +434,9 @@
             updateScore();
             gameActive = true;
             obstacleSpeed = 2;
+            isJumping = false;
+            landingGracePeriod = false;
+            jumpPhase = 'none';
             
             // Hide/show UI elements
             startButton.style.display = 'none';
@@ -439,11 +448,17 @@
             void obstacle.offsetWidth;
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
             
+            // Reset chicken position
+            chicken.classList.remove('chicken-jump');
+            chicken.classList.remove('chicken-scream');
+            
             // Reset achievements on screen but keep unlocked ones in memory
             updateAchievementsDisplay();
         }
         
         function startGameLoop() {
+            let lastJumpTime = 0;
+            
             function checkVolume() {
                 if (!gameActive) return;
                 
@@ -460,10 +475,11 @@
                 // Update volume bar
                 volumeBar.style.width = `${Math.min(volume * 2, 100)}%`;
                 
-                // Jump if volume is loud enough
+                // Jump if volume is loud enough and not already jumping
                 if (volume > 40 && !isJumping) { // Adjust threshold as needed
                     jumpChicken(volume);
                     consecutiveJumps++;
+                    lastJumpTime = Date.now();
                     
                     // Achievement: 5 consecutive jumps
                     if (consecutiveJumps >= 5 && !achievements["achievement-4"]) {
@@ -471,10 +487,37 @@
                     }
                 }
                 
-                // Collision detection
-                if (isColliding()) {
-                    gameOver();
-                    return;
+                // Track jump phases for better collision detection
+                if (isJumping) {
+                    // Get the current transform of the chicken
+                    const transform = window.getComputedStyle(chicken).transform;
+                    if (transform !== 'none') {
+                        // Extract the translateY value (simplistic approach)
+                        const matrix = new DOMMatrix(transform);
+                        const translateY = matrix.m42;
+                        
+                        // Determine jump phase
+                        if (translateY < -20) {
+                            jumpPhase = 'rising';
+                        } else if (translateY > -20 && jumpPhase === 'rising') {
+                            jumpPhase = 'falling';
+                        }
+                    }
+                }
+                
+                // Reset consecutive jumps if no jump happens within 1.5 seconds
+                if (Date.now() - lastJumpTime > 1500) {
+                    consecutiveJumps = 0;
+                }
+                
+                // Collision detection - but only if not in landing grace period
+                if (!landingGracePeriod && isColliding()) {
+                    // Only count collision if chicken is not in the upward phase of jump
+                    // and we're not in the landing grace period
+                    if (jumpPhase !== 'rising') {
+                        gameOver();
+                        return;
+                    }
                 }
                 
                 // Continue game loop
@@ -487,6 +530,7 @@
         function jumpChicken(volume) {
             if (!isJumping) {
                 isJumping = true;
+                jumpPhase = 'rising';
                 
                 // First jump achievement
                 if (!achievements["achievement-1"]) {
@@ -514,15 +558,19 @@
                     createFeatherEffect();
                 }
                 
+                // Set a grace period for landing (about 80% through the jump animation)
+                setTimeout(() => {
+                    landingGracePeriod = true;
+                    jumpPhase = 'falling';
+                }, 400);
+                
+                // End jump animation and reset states
                 setTimeout(() => {
                     chicken.classList.remove('chicken-jump');
                     chicken.classList.remove('chicken-scream');
                     isJumping = false;
-                    
-                    // Reset consecutive jumps if no jump happens within 1.5 seconds
-                    setTimeout(() => {
-                        consecutiveJumps = 0;
-                    }, 1500);
+                    landingGracePeriod = false;
+                    jumpPhase = 'none';
                 }, 500);
             }
         }
@@ -531,11 +579,14 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
+            // Add a small buffer to make collisions more forgiving
+            const buffer = 10;
+            
             return (
-                chickenRect.right > obstacleRect.left &&
-                chickenRect.left < obstacleRect.right &&
-                chickenRect.bottom > obstacleRect.top &&
-                chickenRect.top < obstacleRect.bottom
+                chickenRect.right - buffer > obstacleRect.left &&
+                chickenRect.left + buffer < obstacleRect.right &&
+                chickenRect.bottom - buffer > obstacleRect.top &&
+                chickenRect.top + buffer < obstacleRect.bottom
             );
         }
 
@@ -690,6 +741,13 @@
         // Handle touch events for mobile
         document.addEventListener('touchstart', () => {
             // Enable audio context on mobile if needed
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+        
+        // Some browsers require user interaction to enable audio
+        document.addEventListener('click', () => {
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
