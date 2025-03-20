@@ -264,6 +264,7 @@
             const containerWidth = gameContainer.clientWidth;
             canvas.width = Math.min(containerWidth, 800);
             canvas.height = Math.min(containerWidth * 0.5, 400);
+            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400); // Use smaller scale for consistency
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -281,7 +282,7 @@
             return img;
         });
 
-        let scaleFactor = canvas.width / 800;
+        let scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
         let chicken = { x: 0, y: 0, width: 0, height: 0, vy: 0 };
         let obstacle = { x: 0, y: 0, width: 0, height: 0 };
         let bgX = 0;
@@ -317,8 +318,8 @@
         ];
 
         function startGame() {
-            resizeCanvas(); // Ensure proper sizing on start
-            scaleFactor = canvas.width / 800;
+            resizeCanvas();
+            scaleFactor = Math.min(canvas.width / 800, canvas.height / 400);
             resetGame();
             if (!stream) {
                 navigator.mediaDevices.getUserMedia({ audio: true })
@@ -430,8 +431,8 @@
 
                 // Render
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const bgHeight = canvas.height;
-                const bgWidth = bgHeight * (bgImage.naturalWidth / bgImage.naturalHeight || 1);
+                const bgWidth = canvas.width; // Fill canvas width
+                const bgHeight = bgWidth * (bgImage.naturalHeight / bgImage.naturalWidth || 1); // Preserve aspect ratio
                 ctx.drawImage(bgImage, bgX, 0, bgWidth, bgHeight);
                 ctx.drawImage(bgImage, bgX + bgWidth, 0, bgWidth, bgHeight);
                 ctx.drawImage(chickenImage, chicken.x, chicken.y, chicken.width, chicken.height);
