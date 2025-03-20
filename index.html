@@ -76,13 +76,13 @@
         }
 
         .chicken-jump {
-            animation: jump 0.7s ease; /* Increased animation duration */
+            animation: jump 0.7s ease;
         }
 
         @keyframes jump {
             0% { transform: translateY(0); }
-            50% { transform: translateY(-150px) rotate(20deg); }
-            80% { transform: translateY(-150px) rotate(20deg); } /* Added a plateau phase */
+            50% { transform: translateY(-250px) rotate(20deg); }
+            80% { transform: translateY(-250px) rotate(20deg); }
             100% { transform: translateY(0); }
         }
 
@@ -97,14 +97,14 @@
         }
 
         #obstacle {
-            font-size: 60px;
+            font-size: 30px;
             position: absolute;
-            right: 0;
+            right: -50px;
             bottom: 0;
-            animation: moveObstacle 2s infinite linear;
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: none;
         }
 
         @keyframes moveObstacle {
@@ -350,13 +350,11 @@
             "achievement-5": false
         };
         
-        // Extended variables for better collision detection
-        let jumpPhase = 'none'; // 'none', 'rising', 'plateau', 'falling'
-        let jumpDuration = 700; // Matches the CSS animation duration in ms
-        let safeDuringJump = true; // Safe during most of the jump
-        let collisionDisabled = false; // Flag to disable collision temporarily
+        let jumpPhase = 'none';
+        let jumpDuration = 700;
+        let safeDuringJump = true;
+        let collisionDisabled = false;
 
-        // Fun meme phrases
         const memePhrases = [
             "BAWK BAWK!",
             "CHICKEN POWER!",
@@ -386,24 +384,23 @@
         ];
 
         const obstacleTypes = [
-            { emoji: "🌵", size: "60px" },
-            { emoji: "🪨", size: "60px" },
-            { emoji: "🌲", size: "70px" },
-            { emoji: "🧱", size: "50px" },
-            { emoji: "🪓", size: "50px" }
+            { emoji: "🌵", size: "30px" },
+            { emoji: "🪨", size: "30px" },
+            { emoji: "🌲", size: "35px" },
+            { emoji: "🧱", size: "25px" },
+            { emoji: "🪓", size: "25px" }
         ];
 
         function startGame() {
-            // Reset game state
             resetGame();
             
-            // Request microphone access if not already done
             if (!stream) {
                 navigator.mediaDevices.getUserMedia({ audio: true })
                     .then(streamData => {
                         stream = streamData;
                         setupAudio();
                         startGameLoop();
+                        startObstacles();
                     })
                     .catch(err => {
                         console.error("Microphone access denied:", err);
@@ -412,6 +409,7 @@
                     });
             } else {
                 startGameLoop();
+                startObstacles();
             }
         }
         
@@ -425,12 +423,10 @@
         }
         
         function resetGame() {
-            // Cancel any ongoing animation
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
             }
             
-            // Reset game variables
             score = 0;
             updateScore();
             gameActive = true;
@@ -439,24 +435,22 @@
             jumpPhase = 'none';
             collisionDisabled = false;
             
-            // Hide/show UI elements
             startButton.style.display = 'none';
             gameOverScreen.style.display = 'none';
             
-            // Reset obstacle animation
             obstacle.style.animation = 'none';
-            // Force reflow to reset animation
-            void obstacle.offsetWidth;
-            obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
+            obstacle.style.right = '-50px';
             
-            // Reset chicken position
             chicken.classList.remove('chicken-jump');
             chicken.classList.remove('chicken-scream');
             
-            // Reset achievements on screen but keep unlocked ones in memory
             updateAchievementsDisplay();
         }
         
+        function startObstacles() {
+            obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
+        }
+
         function startGameLoop() {
             let lastJumpTime = 0;
             
@@ -466,43 +460,34 @@
                 analyser.getByteFrequencyData(dataArray);
                 let volume = 0;
                 
-                // Calculate average volume, focusing on higher frequencies
                 for (let i = 0; i < dataArray.length; i++) {
-                    // Give more weight to higher frequencies
                     volume += dataArray[i] * (i / dataArray.length + 0.5);
                 }
                 volume = volume / dataArray.length;
                 
-                // Update volume bar
                 volumeBar.style.width = `${Math.min(volume * 2, 100)}%`;
                 
-                // Jump if volume is loud enough and not already jumping
-                if (volume > 40 && !isJumping) { // Adjust threshold as needed
+                if (volume > 40 && !isJumping) {
                     jumpChicken(volume);
                     consecutiveJumps++;
                     lastJumpTime = Date.now();
                     
-                    // Achievement: 5 consecutive jumps
                     if (consecutiveJumps >= 5 && !achievements["achievement-4"]) {
                         unlockAchievement("achievement-4");
                     }
                 }
                 
-                // Reset consecutive jumps if no jump happens within 1.5 seconds
                 if (Date.now() - lastJumpTime > 1500) {
                     consecutiveJumps = 0;
                 }
                 
-                // Collision detection only if we're not disabling it
                 if (!collisionDisabled && isColliding()) {
-                    // Check if we're in a critical phase of the jump
                     if (jumpPhase === 'falling') {
                         gameOver();
                         return;
                     }
                 }
                 
-                // Continue game loop
                 animationFrame = requestAnimationFrame(checkVolume);
             }
 
@@ -514,28 +499,21 @@
                 isJumping = true;
                 jumpPhase = 'rising';
                 
-                // First jump achievement
                 if (!achievements["achievement-1"]) {
                     unlockAchievement("achievement-1");
                 }
                 
-                // Scale jump height with volume (capped for simplicity)
-                let jumpHeight = Math.min(volume * 2, 300);
+                let jumpHeight = Math.min(volume * 3, 400);
                 chicken.style.setProperty('--jump-height', `-${jumpHeight}px`);
                 
-                // Add jump animation
                 chicken.classList.add('chicken-jump');
-                
-                // Disable collision during most of the jump
                 collisionDisabled = true;
                 
-                // Super loud scream achievement
                 if (volume > 80 && !achievements["achievement-5"]) {
                     unlockAchievement("achievement-5");
                     showMemeOverlay("SUPER SCREAM!", 2000);
                 }
                 
-                // Show random meme text for loud screams
                 if (volume > 60) {
                     const randomMeme = memePhrases[Math.floor(Math.random() * memePhrases.length)];
                     showMemeOverlay(randomMeme, 800);
@@ -543,20 +521,15 @@
                     createFeatherEffect();
                 }
                 
-                // Track jump phases with more precision
-                // Rising phase - first 50% of animation
                 setTimeout(() => {
                     jumpPhase = 'plateau';
                 }, jumpDuration * 0.5);
                 
-                // Plateau phase - from 50% to 80% of animation
                 setTimeout(() => {
                     jumpPhase = 'falling';
-                    // We're more vulnerable in falling phase but still provide some safety
                     collisionDisabled = false;
                 }, jumpDuration * 0.8);
                 
-                // End jump animation and reset states
                 setTimeout(() => {
                     chicken.classList.remove('chicken-jump');
                     chicken.classList.remove('chicken-scream');
@@ -571,7 +544,6 @@
             const chickenRect = chicken.getBoundingClientRect();
             const obstacleRect = obstacle.getBoundingClientRect();
             
-            // Add a larger buffer to make collisions more forgiving
             const buffer = 15;
             
             return (
@@ -588,13 +560,11 @@
             finalScoreElement.textContent = score;
             gameOverScreen.style.display = 'flex';
             
-            // Cancel any ongoing animation frame
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
                 animationFrame = null;
             }
             
-            // Random funny comment
             memeComment.textContent = gameOverComments[Math.floor(Math.random() * gameOverComments.length)];
         }
 
@@ -605,7 +575,6 @@
         function updateScore() {
             scoreElement.textContent = `Score: ${score}`;
             
-            // Check for score-based achievements
             if (score >= 10 && !achievements["achievement-2"]) {
                 unlockAchievement("achievement-2");
             }
@@ -617,11 +586,9 @@
         function increaseSpeed() {
             obstacleSpeed = Math.max(0.8, obstacleSpeed * 0.9);
             obstacle.style.animation = 'none';
-            // Force reflow
             void obstacle.offsetWidth;
             obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
             
-            // Change obstacle type
             changeObstacleType();
         }
 
@@ -648,7 +615,6 @@
                 feather.style.top = `${chicken.offsetTop + Math.random() * 60}px`;
                 effectsContainer.appendChild(feather);
                 
-                // Animate feather
                 const angle = Math.random() * Math.PI * 2;
                 const speed = 1 + Math.random() * 3;
                 const startTime = Date.now();
@@ -662,7 +628,6 @@
                         feather.style.left = `${parseFloat(feather.style.left) + Math.cos(angle) * speed}px`;
                         feather.style.top = `${parseFloat(feather.style.top) + Math.sin(angle) * speed + progress * 2}px`;
                         feather.style.opacity = `${1 - progress}`;
-                        
                         requestAnimationFrame(animateFeather);
                     } else {
                         feather.remove();
@@ -688,57 +653,45 @@
             }
         }
 
-        // Handle obstacle animation end to increment score
         obstacle.addEventListener('animationiteration', () => {
             score++;
             updateScore();
             
-            // Increase difficulty over time
             if (gameActive && score > 0 && score % 5 === 0) {
                 increaseSpeed();
             }
         });
 
-        // Event listeners
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
         
-        // Handle page visibility changes to pause/resume game
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && gameActive) {
-                // Pause game when tab is not visible
                 obstacle.style.animationPlayState = 'paused';
                 if (animationFrame) {
                     cancelAnimationFrame(animationFrame);
                     animationFrame = null;
                 }
             } else if (!document.hidden && gameActive) {
-                // Resume game when tab becomes visible again
                 obstacle.style.animationPlayState = 'running';
                 startGameLoop();
             }
         });
         
-        // Handle window resize
         window.addEventListener('resize', () => {
-            // Adjust anything needed for responsiveness
             if (gameActive) {
-                // Reset obstacle animation to prevent visual glitches
                 obstacle.style.animation = 'none';
                 void obstacle.offsetWidth;
                 obstacle.style.animation = `moveObstacle ${obstacleSpeed}s infinite linear`;
             }
         });
         
-        // Handle touch events for mobile
         document.addEventListener('touchstart', () => {
-            // Enable audio context on mobile if needed
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
         });
         
-        // Some browsers require user interaction to enable audio
         document.addEventListener('click', () => {
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
