@@ -110,10 +110,10 @@
 
         #obstacle {
             position: absolute;
-            right: -80px; /* Reduced from -100px */
+            right: -80px;
             bottom: 0;
-            width: 80px; /* Reduced from 100px */
-            height: 80px; /* Reduced from 100px */
+            width: 80px;
+            height: 80px;
             background-size: contain;
             background-repeat: no-repeat;
             animation: none;
@@ -121,7 +121,7 @@
         }
 
         @keyframes moveObstacle {
-            from { right: -80px; } /* Reduced from -100px */
+            from { right: -80px; }
             to { right: 100%; }
         }
 
@@ -452,7 +452,7 @@
             gameOverScreen.style.display = 'none';
             
             obstacle.style.animation = 'none';
-            obstacle.style.right = '-80px'; // Reduced from -100px
+            obstacle.style.right = '-80px';
             changeObstacleImage();
             
             chicken.classList.remove('chicken-jump');
@@ -486,7 +486,7 @@
                 
                 volumeBar.style.width = `${Math.min(volume * 2, 100)}%`;
                 
-                if (volume > 40 && !isJumping) {
+                if (volume > 20 && !isJumping) { // Changed from 40 to 20
                     jumpChicken(volume);
                     consecutiveJumps++;
                     lastJumpTime = Date.now();
@@ -614,8 +614,8 @@
         function changeObstacleImage() {
             const randomImage = obstacleImages[Math.floor(Math.random() * obstacleImages.length)];
             obstacle.style.backgroundImage = `url('${randomImage}')`;
-            obstacle.style.width = '80px'; // Reduced from 100px
-            obstacle.style.height = '80px'; // Reduced from 100px
+            obstacle.style.width = '80px';
+            obstacle.style.height = '80px';
         }
 
         function showMemeOverlay(text, duration) {
